@@ -34,14 +34,6 @@ jobs:
           - os: ubuntu-latest
             c_compiler: gcc
             cpp_compiler: g++
-        exclude:
-          - os: windows-latest
-            c_compiler: gcc
-            cpp_compiler: g++
-          - os: ubuntu-latest
-            c_compiler: MSVC
-            cpp_compiler: MSVC
-            
     steps:
     - uses: actions/checkout@v3
       with:
