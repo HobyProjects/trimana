@@ -11,11 +11,13 @@ set(
     ${PROJECT_SOURCE_DIR}/src/core/events/events_mouse.hpp
     ${PROJECT_SOURCE_DIR}/src/core/events/events_keyboard.hpp
     ${PROJECT_SOURCE_DIR}/src/core/window/window.hpp
+    ${PROJECT_SOURCE_DIR}/src/core/init/init_core.hpp
 )
 
 set(
     TRIMANA_CORE_SOURCES
     ${PROJECT_SOURCE_DIR}/src/core/window/window.cpp
+    ${PROJECT_SOURCE_DIR}/src/core/init/init_core.cpp
 )
 
 set(TRIMANA_CORE_LIBRARY "trimana-core")

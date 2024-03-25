@@ -7,18 +7,18 @@ namespace trimana_core
     class event_window_resize : public events
     {
     public:
-        event_window_resize(int32_t width, int32_t height) : m_width(width), m_height(height) {}
+        event_window_resize(int width, int height) : m_width(width), m_height(height) {}
         virtual ~event_window_resize() = default;
 
         EVENT_TYPE_CATEGORY(EVENT_WINDOW_RESIZE, EVENT_WINDOW);
         EVENT_LOG(EVENT_WINDOW_RESIZE, "{0} : {1}, {2}", get_name(), m_width, m_height);
 
-        int32_t get_width() const { return m_width; }
-        int32_t get_height() const { return m_height; }
+        int get_width() const { return m_width; }
+        int get_height() const { return m_height; }
 
     private:
-        int32_t m_width{NULL};
-        int32_t m_height{NULL};
+        int m_width{NULL};
+        int m_height{NULL};
     };
 
     class event_window_viewport_resize : public events
@@ -30,8 +30,8 @@ namespace trimana_core
         EVENT_TYPE_CATEGORY(EVENT_WINDOW_VIEWPORT_RESIZE, EVENT_WINDOW);
         EVENT_LOG(EVENT_WINDOW_VIEWPORT_RESIZE, "{0} : {1} , {2}", get_name(), m_width, m_height);
 
-        int32_t get_width() const { return m_width; }
-        int32_t get_height() const { return m_height; }
+        int get_width() const { return m_width; }
+        int get_height() const { return m_height; }
 
     private:
         int32_t m_width{NULL};
@@ -51,18 +51,18 @@ namespace trimana_core
     class event_window_pos_change : public events
     {
     public:
-        event_window_pos_change(int32_t pos_x, int32_t pos_y) : m_posx(pos_x), m_posy(pos_y) {}
+        event_window_pos_change(int pos_x, int pos_y) : m_posx(pos_x), m_posy(pos_y) {}
         virtual ~event_window_pos_change() = default;
 
         EVENT_TYPE_CATEGORY(EVENT_WINDOW_POS_CHANGED, EVENT_WINDOW);
         EVENT_LOG(EVENT_WINDOW_POS_CHANGED, EVENT_WINDOW);
 
-        int32_t get_posx() const { return m_posx; }
-        int32_t get_posy() const { return m_posy; }
+        int get_posx() const { return m_posx; }
+        int get_posy() const { return m_posy; }
 
     private:
-        int32_t m_posx{NULL};
-        int32_t m_posy{NULL};
+        int m_posx{NULL};
+        int m_posy{NULL};
     };
 
     class event_window_minimize : public events

@@ -7,7 +7,7 @@
 
 namespace trimana_core
 {
-    enum EVENT_CATEGORY : int32_t
+    enum EVENT_CATEGORY : int
     {
         EVENT_WINDOW,
         EVENT_KEYBOARD,
@@ -15,7 +15,7 @@ namespace trimana_core
         EVENT_UNKNOWN
     };
 
-    enum EVENT_TYPE : int32_t
+    enum EVENT_TYPE : int
     {
         EVENT_WINDOW_RESIZE,
         EVENT_WINDOW_CLOSE,
@@ -32,7 +32,6 @@ namespace trimana_core
 
         EVENT_MOUSE_BUTTON_PRESS,
         EVENT_MOUSE_BUTTON_RELEASE,
-        EVENT_MOUSE_BUTTON_HOLD,
         EVENT_MOUSE_SCROLL,
         EVENT_MOUSE_POS_CHANGE
     };

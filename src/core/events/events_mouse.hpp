@@ -8,7 +8,7 @@ namespace trimana_core
     class event_mouse_button_press : public events
     {
     public:
-        event_mouse_button_press(int32_t button) : m_button(button) {}
+        event_mouse_button_press(int button) : m_button(button) {}
         virtual ~event_mouse_button_press() = default;
 
         EVENT_TYPE_CATEGORY(EVENT_MOUSE_BUTTON_PRESS, EVENT_MOUSE);
@@ -16,16 +16,16 @@ namespace trimana_core
                                                                                                                               : (m_button == SDL_BUTTON_MIDDLE)  ? "MOUSE_MIDDLE_BUTTON_PRESS"
                                                                                                                                                                  : "MOUSE_BUTTON_UKNOWN_PRESS_DETECTED"));
 
-        int32_t get_button() const { return m_button; }
+        int get_button() const { return m_button; }
 
     private:
-        int32_t m_button{NULL};
+        int m_button{NULL};
     };
 
     class event_mouse_button_release : public events
     {
     public:
-        event_mouse_button_release(int32_t button) : m_button(button) {}
+        event_mouse_button_release(int button) : m_button(button) {}
         virtual ~event_mouse_button_release() = default;
 
         EVENT_TYPE_CATEGORY(EVENT_MOUSE_BUTTON_RELEASE, EVENT_MOUSE);
@@ -33,44 +33,27 @@ namespace trimana_core
                                                                                                                                 : (m_button == SDL_BUTTON_MIDDLE)  ? "MOUSE_MIDDLE_BUTTON_PRESS"
                                                                                                                                                                    : "MOUSE_BUTTON_UKNOWN_PRESS_DETECTED"));
 
-        int32_t get_button() const { return m_button; }
+        int get_button() const { return m_button; }
 
     private:
-        int32_t m_button{NULL};
-    };
-
-    class event_mouse_button_hold : public events
-    {
-    public:
-        event_mouse_button_hold(int32_t button) : m_button(button) {}
-        virtual ~event_mouse_button_hold() = default;
-
-        EVENT_TYPE_CATEGORY(EVENT_MOUSE_BUTTON_HOLD, EVENT_MOUSE);
-        EVENT_LOG(EVENT_MOUSE_BUTTON_HOLD, "{0} : {1}", get_name(), ((m_button == SDL_BUTTON_LEFT) ? "MOUSE_BUTTON_LEFT_PRESS" : (m_button == SDL_BUTTON_RIGHT) ? "MOUSE_BUTTON_RIGHT_PRESS"
-                                                                                                                             : (m_button == SDL_BUTTON_MIDDLE)  ? "MOUSE_MIDDLE_BUTTON_PRESS"
-                                                                                                                                                                : "MOUSE_BUTTON_UKNOWN_PRESS_DETECTED"));
-
-        int32_t get_button() const { return m_button; }
-
-    private:
-        int32_t m_button{NULL};
+        int m_button{NULL};
     };
 
     class event_mouse_scroll : public events
     {
     public:
-        event_mouse_scroll(int32_t offset_x, int32_t offset_y) : m_offset_x(offset_x), m_offset_y(offset_y) {}
+        event_mouse_scroll(int offset_x, int offset_y) : m_offset_x(offset_x), m_offset_y(offset_y) {}
         virtual ~event_mouse_scroll() = default;
 
         EVENT_TYPE_CATEGORY(EVENT_MOUSE_SCROLL, EVENT_MOUSE);
         EVENT_LOG(EVENT_MOUSE_SCROLL, "{0} : {1}, {2}", get_name(), m_offset_x, m_offset_y);
 
-        int32_t get_offset_x() const { return m_offset_x; }
-        int32_t get_offset_y() const { return m_offset_y; }
+        int get_offset_x() const { return m_offset_x; }
+        int get_offset_y() const { return m_offset_y; }
 
     private:
-        int32_t m_offset_x{NULL};
-        int32_t m_offset_y{NULL};
+        int m_offset_x{NULL};
+        int m_offset_y{NULL};
     };
 
     class event_mouse_pos_change : public events
