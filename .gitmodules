@@ -1,0 +1,12 @@
+[submodule "lib/SDL"]
+	path = lib/SDL
+	url = https://github.com/libsdl-org/SDL.git
+[submodule "lib/spdlog"]
+	path = lib/spdlog
+	url = https://github.com/gabime/spdlog.git
+[submodule "lib/glm"]
+	path = lib/glm
+	url = https://github.com/g-truc/glm.git
+[submodule "lib/glew-cmake"]
+	path = lib/glew-cmake
+	url = https://github.com/Perlmint/glew-cmake.git
