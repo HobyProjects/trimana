@@ -78,44 +78,4 @@ namespace trimana_core
             void poll_events() override;
             void set_handler(const event_callback_func& callback) override;
     };
-    
-    struct window_properties
-    {
-        window_properties() = default;
-        ~window_properties() = default;
-
-        bool is_vsync_enabled{false};
-        bool is_window_focused{false};
-        bool is_active{false};
-        bool is_child_window{false};
-        
-        int window_min_height{NULL};
-        int window_min_width{NULL};
-        int window_max_height{NULL};
-        int window_max_width{NULL};
-        int window_normal_width{NULL};
-        int window_normal_height{NULL};
-
-        int window_posx{NULL};
-        int window_posy{NULL};
-
-        int window_viewport_width{NULL};
-        int window_viewport_height{NULL};
-
-        int window_id{NULL};
-        int window_state{NULL};
-        int window_flags{NULL};
-
-        float window_refresh_rate{0.0f};
-        std::string title{"Unknown"};
-        void *window_context{nullptr};
-        SDL_Window* window{nullptr};
-        SDL_Event window_event{NULL};
-        event_callback_func call_back;
-    };
-
-    window_properties *window_create(const std::string &window_title, int window_id);
-    void window_destroy(window_properties *window_prop);
-    void get_window_events(window_properties *window_prop);
-    void set_window_event_handler(window_properties *window_prop, const event_callback_func &call_back);
 }
