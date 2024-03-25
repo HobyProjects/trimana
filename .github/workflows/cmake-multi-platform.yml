@@ -25,7 +25,6 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
         build_type: [Debug]
-        c_compiler: [gcc, clang, cl, MSVC]
         cpp_compiler: [g++, clang++, cl, MSVC]
         include:
           - os: windows-latest
@@ -39,13 +38,13 @@ jobs:
             
         exclude:
           - os: windows-latest
-            c_compiler: gcc
+            cpp_compiler: g++
           - os: windows-latest
-            c_compiler: clang
+            cpp_compiler: clang++
           - os: ubuntu-latest
-            c_compiler: cl
+            cpp_compiler: cl
           - os: ubuntu-latest
-            c_compiler: MSVC
+            cpp_compiler: MSVC
         
     steps:
     - uses: actions/checkout@v3
