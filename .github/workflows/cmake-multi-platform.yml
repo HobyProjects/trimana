@@ -33,6 +33,13 @@ jobs:
           - os: ubuntu-latest
             c_compiler: clang
             cpp_compiler: clang
+        exclude:
+          - os: windows-latest
+            c_compiler: clang
+            cpp_compiler: clang
+          - os: ubuntu-latest
+            c_compiler: MSVC
+            cpp_compiler: MSVC
             
     steps:
     - uses: actions/checkout@v3
