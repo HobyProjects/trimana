@@ -41,6 +41,13 @@ jobs:
           - os: ubuntu-latest
             c_compiler: MSVC
             cpp_compiler: MSVC
+          - os: window-latest
+            c_compiler: cl
+            cpp_compiler: MSVC
+          - os: ubuntu-latest
+            c_compiler: MSVC
+            cpp_compiler: cl
+          
     steps:
     - uses: actions/checkout@v3
       with:
