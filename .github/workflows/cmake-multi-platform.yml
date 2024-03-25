@@ -28,17 +28,13 @@ jobs:
         cpp_compiler: [g++, MSVC]
         include:
           - os: windows-latest
-            c_compiler: MSVC
             cpp_compiler: MSVC
           - os: ubuntu-latest
-            c_compiler: gcc
             cpp_compiler: g++
         exclude:
           - os: windows-latest
-            c_compiler: gcc
             cpp_compiler: g++
           - os: ubuntu-latest
-            c_compiler: MSVC
             cpp_compiler: MSVC
 
     steps:
