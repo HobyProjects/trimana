@@ -9,6 +9,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
+#include "utils/logger.hpp"
+
 #define GL_ZERO 0
 #define GL_ZEROF 0.0f
 #define GL_UNBIND 0
@@ -22,7 +24,7 @@ typedef unsigned int element_buff_loc;
 typedef unsigned int *element_buff_data;
 typedef float *vertex_buff_data;
 typedef unsigned int texture_loc;
-typedef unsigned int uniform_var;
+typedef unsigned int uniform_var_loc;
 typedef unsigned int frame_buff_loc;
 typedef unsigned int depth_buff_loc;
 
@@ -97,6 +99,7 @@ namespace trimana_core
         shader() = default;
         ~shader() = default;
 
+
         shader_program shader_prog{GL_ZERO};
         vertex_shader vertex_shader_prog{GL_ZERO};
         fragment_shader fragment_shader_prog{GL_ZERO};
@@ -129,23 +132,22 @@ namespace trimana_core
     void link_buffer_layout(unsigned int layout, vertex_buffers *buffers, VERTEX_BUFFER_TYPE vtype, COMPONENT_TYPE ctype);
     void link_element_buffers(vertex_buffers *buffer);
     void render(vertex_buffers *buffers, DRAW_CALLS dcall);
-    void delete_buffers(vertex_buffers *buffers);
+    void delete_buffers(vertex_buffers *buffers, unsigned int num_buffers_used);
 
-    uniform_var get_uniform_loc(shader_program &program, const std::string &uniform_val);
+    uniform_var_loc get_uniform_loc(shader_program &program, const std::string &uniform_val);
     shader *create_shader_program(const std::string &vshader, const std::string &fshader);
     void shader_attach(shader_program &program);
     void shader_dettach();
-    bool delete_shader(shader_program &program);
-    bool delete_program(shader_program &program);
+    bool delete_shaders_n_program(shader* programs);
 
-    void update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, int data);
-    void update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, unsigned int data);
-    void update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, float data);
-    void update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, float x, float y);
-    void update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, float x, float y, float z);
-    void update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, float x, float y, float z, float w);
-    void update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, glm::mat4 &data);
-    void update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, glm::mat3 &data);
+    bool update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, int data);
+    bool update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, unsigned int data);
+    bool update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, float data);
+    bool update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, float x, float y);
+    bool update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, float x, float y, float z);
+    bool update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, float x, float y, float z, float w);
+    bool update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, glm::mat4 &data);
+    bool update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, glm::mat3 &data);
 
     texture_loc load_texture(const std::string &loc, COLOR_CHANNELS channels, bool flip = true);
     void texture_attach(texture_loc &texture);
