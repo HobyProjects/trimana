@@ -8,7 +8,6 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/vector_angle.hpp>
-
 #include "utils/logger.hpp"
 
 #define GL_ZERO 0
