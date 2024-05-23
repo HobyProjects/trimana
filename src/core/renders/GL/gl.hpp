@@ -98,7 +98,6 @@ namespace trimana_core
         shader() = default;
         ~shader() = default;
 
-
         shader_program shader_prog{GL_ZERO};
         vertex_shader vertex_shader_prog{GL_ZERO};
         fragment_shader fragment_shader_prog{GL_ZERO};
