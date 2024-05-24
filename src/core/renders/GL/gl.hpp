@@ -8,6 +8,7 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/vector_angle.hpp>
+
 #include "utils/logger.hpp"
 
 #define GL_ZERO 0
@@ -21,7 +22,7 @@ typedef unsigned int vertex_buff_loc;
 typedef unsigned int vertex_attr_ptr;
 typedef unsigned int element_buff_loc;
 typedef unsigned int *element_buff_data;
-typedef float *vertex_buff_data;
+typedef float        *vertex_buff_data;
 typedef unsigned int texture_loc;
 typedef unsigned int uniform_var_loc;
 typedef unsigned int frame_buff_loc;

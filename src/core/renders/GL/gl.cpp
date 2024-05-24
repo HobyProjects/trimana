@@ -1,3 +1,6 @@
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb/stb_image.h>
+
 #define GLM_ENABLE_EXPERIMENTAL
 #include "gl.hpp"
 
@@ -109,9 +112,9 @@ void trimana_core::link_buffer_layout(unsigned int layout, vertex_buffers *buffe
     glEnableVertexAttribArray(layout);
 }
 
-void trimana_core::link_element_buffers(vertex_buffers* buffers)
+void trimana_core::link_element_buffers(vertex_buffers *buffers)
 {
-    if(buffers != nullptr)
+    if (buffers != nullptr)
     {
         glBindVertexArray(buffers->element_buff);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers->element_buff);
@@ -123,35 +126,35 @@ void trimana_core::render(vertex_buffers *buffers, DRAW_CALLS dcall)
 {
     glBindVertexArray(buffers->vertex_arry_ptr);
 
-	if (buffers->element_buff != GL_ZERO)
-	{
-		glDrawElements(static_cast<GLenum>(dcall), buffers->indices_count, GL_UNSIGNED_INT, nullptr);
-	}
-	else
-	{
-		glDrawArrays(static_cast<GLenum>(dcall), GL_ZERO, buffers->indices_count);
-	}
+    if (buffers->element_buff != GL_ZERO)
+    {
+        glDrawElements(static_cast<GLenum>(dcall), buffers->indices_count, GL_UNSIGNED_INT, nullptr);
+    }
+    else
+    {
+        glDrawArrays(static_cast<GLenum>(dcall), GL_ZERO, buffers->indices_count);
+    }
 
-	glBindVertexArray(GL_UNBIND);
+    glBindVertexArray(GL_UNBIND);
 }
 
-void trimana_core::delete_buffers(vertex_buffers* buffers, unsigned int num_buffers_used)
+void trimana_core::delete_buffers(vertex_buffers *buffers, unsigned int num_buffers_used)
 {
     glDeleteBuffers(num_buffers_used, &buffers->vertex_buff);
-	glDeleteBuffers(num_buffers_used, &buffers->color_buff);
-	glDeleteBuffers(num_buffers_used, &buffers->texture_buff);
-	glDeleteBuffers(num_buffers_used, &buffers->normals_buff);
-	glDeleteVertexArrays(num_buffers_used, &buffers->vertex_arry_ptr);
-	glDeleteBuffers(num_buffers_used, &buffers->element_buff);
-	delete buffers;
+    glDeleteBuffers(num_buffers_used, &buffers->color_buff);
+    glDeleteBuffers(num_buffers_used, &buffers->texture_buff);
+    glDeleteBuffers(num_buffers_used, &buffers->normals_buff);
+    glDeleteVertexArrays(num_buffers_used, &buffers->vertex_arry_ptr);
+    glDeleteBuffers(num_buffers_used, &buffers->element_buff);
+    delete buffers;
 }
 
 uniform_var_loc trimana_core::get_uniform_loc(shader_program &program, const std::string &uniform_val)
 {
-    if(program)
+    if (program)
     {
         uniform_var_loc uniform = glGetUniformLocation(program, uniform_val.c_str());
-        if(uniform)
+        if (uniform)
         {
             return uniform;
         }
@@ -164,112 +167,111 @@ uniform_var_loc trimana_core::get_uniform_loc(shader_program &program, const std
     return GL_ZERO;
 }
 
-static std::string import_shader(const std::string& shader_file)
+static std::string import_shader(const std::string &shader_file)
 {
-	std::string fileContent{ " " };
-	std::fstream shaderFile(shader_file.c_str(), std::ios::in);
+    std::string fileContent{" "};
+    std::fstream shaderFile(shader_file.c_str(), std::ios::in);
 
-	if (!shaderFile.is_open())
-	{
-		LOG_CRITICAL("Unbale to open file: {0}", shader_file.c_str());
-		return fileContent;
-	}
-	else
-	{
-		std::string lines{ " " };
-		while (!shaderFile.eof())
-		{
-			std::getline(shaderFile, lines);
-			fileContent.append(lines + "\n");
-		}
+    if (!shaderFile.is_open())
+    {
+        LOG_CRITICAL("Unbale to open file: {0}", shader_file.c_str());
+        return fileContent;
+    }
+    else
+    {
+        std::string lines{" "};
+        while (!shaderFile.eof())
+        {
+            std::getline(shaderFile, lines);
+            fileContent.append(lines + "\n");
+        }
 
-		shaderFile.close();
-	}
+        shaderFile.close();
+    }
 
-	return fileContent;
+    return fileContent;
 }
 
-static shader_program compile_shader_program(shader_program& program, const std::string& shader_code, trimana_core::SHADER_TYPE shader_type)
+static shader_program compile_shader_program(shader_program &program, const std::string &shader_code, trimana_core::SHADER_TYPE shader_type)
 {
-	unsigned int shader = glCreateShader(static_cast<GLenum>(shader_type));
-	const char* src = shader_code.c_str();
+    unsigned int shader = glCreateShader(static_cast<GLenum>(shader_type));
+    const char *src = shader_code.c_str();
 
-	glShaderSource(shader, 1, &src, nullptr);
-	glCompileShader(shader);
+    glShaderSource(shader, 1, &src, nullptr);
+    glCompileShader(shader);
 
+    int result{0};
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
 
-	int result{ 0 };
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
+    if (result == GL_FALSE)
+    {
+        int mlength{0};
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &mlength);
+        char *message = (char *)alloca(mlength * sizeof(char));
+        glGetShaderInfoLog(shader, sizeof(message), &mlength, message);
 
-	if (result == GL_FALSE)
-	{
-		int mlength{ 0 };
-		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &mlength);
-		char* message = (char*) alloca(mlength * sizeof(char));
-		glGetShaderInfoLog(shader, sizeof(message), &mlength, message);
+        LOG_CRITICAL("SHADER PROGRAM COMPILE ERROR {0}", ((static_cast<GLenum>(shader_type) == GL_VERTEX_SHADER) ? "VERTEX-SHADER" : "FRAGMENT-SHADER"));
+        LOG_WARN("SHADER PROGRAM CONTAINS FOLLOWING ERRORS : {0}", message);
+        return GL_ZERO;
+    }
 
-		LOG_CRITICAL("SHADER PROGRAM COMPILE ERROR {0}", ((static_cast<GLenum>(shader_type) == GL_VERTEX_SHADER) ? "VERTEX-SHADER" : "FRAGMENT-SHADER"));
-		LOG_WARN("SHADER PROGRAM CONTAINS FOLLOWING ERRORS : {0}", message);
-		return GL_ZERO;
-	}
-
-	glAttachShader(program, shader);
-	return shader;
+    glAttachShader(program, shader);
+    return shader;
 }
 
-trimana_core::shader* trimana_core::create_shader_program(const std::string &vshader, const std::string &fshader)
+trimana_core::shader *trimana_core::create_shader_program(const std::string &vshader, const std::string &fshader)
 {
-    shader* shdr = new shader();
-	shdr->shader_prog = glCreateProgram();
-	if (!shdr->shader_prog)
-	{
-		LOG_CRITICAL("SHADER PROGRAM WASN'T CREATED PROPERLY.");
-		return nullptr;
-	}
+    shader *shdr = new shader();
+    shdr->shader_prog = glCreateProgram();
+    if (!shdr->shader_prog)
+    {
+        LOG_CRITICAL("SHADER PROGRAM WASN'T CREATED PROPERLY.");
+        return nullptr;
+    }
 
-	shdr->vertex_shader_code = import_shader(vshader);
-	shdr->fragment_shader_code = import_shader(fshader);
+    shdr->vertex_shader_code = import_shader(vshader);
+    shdr->fragment_shader_code = import_shader(fshader);
 
-	shdr->vertex_shader_prog = compile_shader_program(shdr->shader_prog, shdr->vertex_shader_code, SHADER_TYPE::VERTEX_SHADER);
-	shdr->fragment_shader_prog = compile_shader_program(shdr->shader_prog, shdr->fragment_shader_code, SHADER_TYPE::FRAGMENT_SHADER);
+    shdr->vertex_shader_prog = compile_shader_program(shdr->shader_prog, shdr->vertex_shader_code, SHADER_TYPE::VERTEX_SHADER);
+    shdr->fragment_shader_prog = compile_shader_program(shdr->shader_prog, shdr->fragment_shader_code, SHADER_TYPE::FRAGMENT_SHADER);
 
-	int result{ 0 };
-	int length{ 0 };
-	char* message{ nullptr };
+    int result{0};
+    int length{0};
+    char *message{nullptr};
 
-	glLinkProgram(shdr->shader_prog);
-	glGetProgramiv(shdr->shader_prog, GL_LINK_STATUS, &result);
+    glLinkProgram(shdr->shader_prog);
+    glGetProgramiv(shdr->shader_prog, GL_LINK_STATUS, &result);
 
-	if (result == GL_FALSE)
-	{
-		glGetProgramiv(shdr->shader_prog, GL_INFO_LOG_LENGTH, &length);
-		message = (char*) alloca(length * sizeof(char));
-		glGetProgramInfoLog(shdr->shader_prog, sizeof(message), &length, message);
+    if (result == GL_FALSE)
+    {
+        glGetProgramiv(shdr->shader_prog, GL_INFO_LOG_LENGTH, &length);
+        message = (char *)alloca(length * sizeof(char));
+        glGetProgramInfoLog(shdr->shader_prog, sizeof(message), &length, message);
 
-		LOG_CRITICAL("SHADER PROGRAM LINKING ERROR -> {0}", message);
-		return nullptr;
-	}
+        LOG_CRITICAL("SHADER PROGRAM LINKING ERROR -> {0}", message);
+        return nullptr;
+    }
 
-	glValidateProgram(shdr->shader_prog);
-	glGetProgramiv(shdr->shader_prog, GL_VALIDATE_STATUS, &result);
+    glValidateProgram(shdr->shader_prog);
+    glGetProgramiv(shdr->shader_prog, GL_VALIDATE_STATUS, &result);
 
-	if (result == GL_FALSE)
-	{
-		glGetProgramiv(shdr->shader_prog, GL_INFO_LOG_LENGTH, &length);
-		message = (char*) alloca(length * sizeof(char));
-		glGetProgramInfoLog(shdr->shader_prog, sizeof(message), &length, message);
+    if (result == GL_FALSE)
+    {
+        glGetProgramiv(shdr->shader_prog, GL_INFO_LOG_LENGTH, &length);
+        message = (char *)alloca(length * sizeof(char));
+        glGetProgramInfoLog(shdr->shader_prog, sizeof(message), &length, message);
 
-		LOG_CRITICAL("SHADER PROGRAM VALIDATION ERROR -> {0}", message);
-		return nullptr;
-	}
+        LOG_CRITICAL("SHADER PROGRAM VALIDATION ERROR -> {0}", message);
+        return nullptr;
+    }
 
     shdr->shader_program_created = true;
-	return shdr;
+    return shdr;
 }
 
 void trimana_core::shader_attach(shader_program &program)
 {
-    if(program)
+    if (program)
     {
         glUseProgram(program);
     }
@@ -280,9 +282,9 @@ void trimana_core::shader_dettach()
     glUseProgram(GL_UNBIND);
 }
 
-bool trimana_core::delete_shaders_n_program(shader* programs)
+bool trimana_core::delete_shaders_n_program(shader *programs)
 {
-    if(programs != nullptr)
+    if (programs != nullptr)
     {
         glDeleteShader(programs->vertex_shader_prog);
         glDeleteShader(programs->fragment_shader_prog);
@@ -295,38 +297,40 @@ bool trimana_core::delete_shaders_n_program(shader* programs)
     return false;
 }
 
-
-static uniform_var_loc uniform_update_validation(trimana_core::shader* shdr, trimana_core::SHADER_TYPE type, const std::string& uniform_var)
+static uniform_var_loc uniform_update_validation(trimana_core::shader *shdr, trimana_core::SHADER_TYPE type, const std::string &uniform_var)
 {
-    if(shdr != nullptr && shdr->shader_prog)
+    if (shdr != nullptr && shdr->shader_prog)
     {
         uniform_var_loc mem_loc{GL_ZERO};
 
-        switch(type)
+        switch (type)
         {
-            case trimana_core::SHADER_TYPE::VERTEX_SHADER:
-                mem_loc = glGetUniformLocation(shdr->vertex_shader_prog, uniform_var.c_str());
-                break;
-            
-            case trimana_core::SHADER_TYPE::FRAGMENT_SHADER:
-                mem_loc = glGetUniformLocation(shdr->fragment_shader_prog, uniform_var.c_str());
-                break;
+        case trimana_core::SHADER_TYPE::VERTEX_SHADER:
+            mem_loc = glGetUniformLocation(shdr->vertex_shader_prog, uniform_var.c_str());
+            break;
 
-            default:
-                break;
+        case trimana_core::SHADER_TYPE::FRAGMENT_SHADER:
+            mem_loc = glGetUniformLocation(shdr->fragment_shader_prog, uniform_var.c_str());
+            break;
+
+        default:
+            break;
         }
 
-        if(mem_loc)
+        if (mem_loc)
             return mem_loc;
         else
-            return GL_ZERO;        
+            return GL_ZERO;
     }
+
+    return GL_ZERO;
 }
 
 bool trimana_core::update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, int data)
 {
     uniform_var_loc location = uniform_update_validation(shdr, type, uniform);
-    if(location)
+
+    if (location)
     {
         glUniform1i(location, data);
         return true;
@@ -335,4 +339,139 @@ bool trimana_core::update_uniform(shader *shdr, SHADER_TYPE type, const std::str
     return false;
 }
 
+bool trimana_core::update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, unsigned int data)
+{
+    uniform_var_loc location = uniform_update_validation(shdr, type, uniform);
 
+    if (location)
+    {
+        glUniform1ui(location, data);
+        return true;
+    }
+
+    return false;
+}
+
+bool trimana_core::update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, float data)
+{
+    uniform_var_loc location = uniform_update_validation(shdr, type, uniform);
+
+    if (location)
+    {
+        glUniform1f(location, data);
+        return true;
+    }
+
+    return false;
+}
+
+bool trimana_core::update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, float x, float y)
+{
+    uniform_var_loc location = uniform_update_validation(shdr, type, uniform);
+
+    if (location)
+    {
+        glUniform2f(location, x, y);
+        return true;
+    }
+
+    return false;
+}
+
+bool trimana_core::update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, float x, float y, float z)
+{
+    uniform_var_loc location = uniform_update_validation(shdr, type, uniform);
+
+    if (location)
+    {
+        glUniform3f(location, x, y, z);
+        return true;
+    }
+
+    return false;
+}
+
+bool trimana_core::update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, float x, float y, float z, float w)
+{
+    uniform_var_loc location = uniform_update_validation(shdr, type, uniform);
+
+    if (location)
+    {
+        glUniform4f(location, x, y, z, w);
+        return true;
+    }
+
+    return false;
+}
+
+bool trimana_core::update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, glm::mat4 &data)
+{
+    uniform_var_loc location = uniform_update_validation(shdr, type, uniform);
+
+    if (location)
+    {
+        glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(data));
+        return true;
+    }
+
+    return false;
+}
+
+bool trimana_core::update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, glm::mat3 &data)
+{
+    uniform_var_loc location = uniform_update_validation(shdr, type, uniform);
+
+    if (location)
+    {
+        glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(data));
+        return true;
+    }
+
+    return false;
+}
+
+texture_loc trimana_core::load_texture(const std::string &loc, COLOR_CHANNELS channels, bool flip)
+{
+    stbi_set_flip_vertically_on_load(flip);
+    int width{GL_ZERO}, height{GL_ZERO}, BPP{GL_ZERO};
+    unsigned char *texture_buffer = stbi_load(loc.c_str(), &width, &height, &BPP, channels);
+
+    if (texture_buffer != nullptr)
+    {
+        texture_loc ID{GL_ZERO};
+        glGenTextures(1, &ID);
+        glBindTexture(GL_TEXTURE_2D, ID);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+        glTexImage2D(GL_TEXTURE_2D, GL_ZERO, (channels == COLOR_CHANNELS::RGB) ? GL_RGB8 : GL_RGBA8, width, height, 0, (channels == COLOR_CHANNELS::RGBA) ? GL_RGB8 : GL_RGBA8, GL_UNSIGNED_BYTE, texture_buffer);
+
+        glBindTexture(GL_TEXTURE_2D, GL_ZERO);
+
+        return ID;
+    }
+
+    LOG_CRITICAL("UNABLE TO LOAD TEXTURE FROM {0}", loc.c_str());
+    return GL_ZERO;
+}
+
+void trimana_core::texture_attach(texture_loc &texture)
+{
+    glBindTexture(GL_TEXTURE_3D, texture);
+}
+
+void trimana_core::texture_dettach()
+{
+    glBindTexture(GL_TEXTURE_3D, GL_UNBIND);
+}
+
+void trimana_core::delete_texture(texture_loc &texture)
+{
+    if (texture)
+    {
+        glDeleteTextures(1, &texture);
+    }
+}

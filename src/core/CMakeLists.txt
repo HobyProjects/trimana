@@ -1,5 +1,6 @@
 set(
     TRIMANA_CORE_SRC_DIR
+    ${PROJECT_SOURCE_DIR}/lib
     ${PROJECT_SOURCE_DIR}/src/core
 )
 
@@ -13,6 +14,8 @@ set(
     ${PROJECT_SOURCE_DIR}/src/core/events/events_keyboard.hpp
     ${PROJECT_SOURCE_DIR}/src/core/window/window.hpp
     ${PROJECT_SOURCE_DIR}/src/core/renders/GL/gl.hpp
+
+    ${PROJECT_SOURCE_DIR}/lib/stb/stb_image.h
 )
 
 set(
@@ -24,7 +27,7 @@ set(
 
 set(TRIMANA_CORE_LIBRARY "trimana-core")
 add_library(${TRIMANA_CORE_LIBRARY} STATIC ${TRIMANA_CORE_HEADERS} ${TRIMANA_CORE_SOURCES})
-target_include_directories(${TRIMANA_CORE_LIBRARY} BEFORE PUBLIC ${TRIMANA_CORE_SRC_DIR})
+target_include_directories(${TRIMANA_CORE_LIBRARY} PUBLIC  ${TRIMANA_CORE_SRC_DIR})
 
 target_link_libraries(
     ${TRIMANA_CORE_LIBRARY} PUBLIC 
