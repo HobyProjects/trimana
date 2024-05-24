@@ -42,18 +42,18 @@ namespace trimana_core
     class event_mouse_scroll : public events
     {
     public:
-        event_mouse_scroll(int offset_x, int offset_y) : m_offset_x(offset_x), m_offset_y(offset_y) {}
+        event_mouse_scroll(float offset_x, float offset_y) : m_offset_x(offset_x), m_offset_y(offset_y) {}
         virtual ~event_mouse_scroll() = default;
 
         EVENT_TYPE_CATEGORY(EVENT_MOUSE_SCROLL, EVENT_MOUSE);
         EVENT_LOG(EVENT_MOUSE_SCROLL, "{0} : {1}, {2}", get_name(), m_offset_x, m_offset_y);
 
-        int get_offset_x() const { return m_offset_x; }
-        int get_offset_y() const { return m_offset_y; }
+        float get_offset_x() const { return m_offset_x; }
+        float get_offset_y() const { return m_offset_y; }
 
     private:
-        int m_offset_x{NULL};
-        int m_offset_y{NULL};
+        float m_offset_x{NULL};
+        float m_offset_y{NULL};
     };
 
     class event_mouse_pos_change : public events

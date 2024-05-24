@@ -14,6 +14,7 @@ set(
     ${PROJECT_SOURCE_DIR}/src/core/events/events_keyboard.hpp
     ${PROJECT_SOURCE_DIR}/src/core/window/window.hpp
     ${PROJECT_SOURCE_DIR}/src/core/renders/GL/gl.hpp
+    ${PROJECT_SOURCE_DIR}/src/core/model/model.hpp
 
     ${PROJECT_SOURCE_DIR}/lib/stb/stb_image.h
 )
@@ -23,6 +24,7 @@ set(
     ${PROJECT_SOURCE_DIR}/src/core/entry/init_core.cpp
     ${PROJECT_SOURCE_DIR}/src/core/window/window.cpp
     ${PROJECT_SOURCE_DIR}/src/core/renders/GL/gl.cpp
+    ${PROJECT_SOURCE_DIR}/src/core/model/model.cpp
 )
 
 set(TRIMANA_CORE_LIBRARY "trimana-core")
@@ -35,4 +37,5 @@ target_link_libraries(
     spdlog::spdlog_header_only
     libglew_static
     glm::glm-header-only
+    assimp
 )
