@@ -9,7 +9,7 @@
 
 #include "renders/GL/gl.hpp"
 
-namespace trimana_core
+namespace TrimanaCore
 {
     struct vertexs
     {
@@ -38,9 +38,9 @@ namespace trimana_core
     struct model
     {
         std::vector<mesh*> meshes;
-        std::vector<texture_loc> textures;
-        vertex_buffers* buffers{nullptr};
-        shader* shader_program{nullptr};
+        std::vector<TextureLocation> textures;
+        VertexBuffers* buffers{nullptr};
+        Shader* ShaderProgram{nullptr};
         bool ready_to_draw{false};
     };
 

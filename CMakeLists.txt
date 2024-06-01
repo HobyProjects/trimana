@@ -17,7 +17,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_BUILD_TYPE "Debug")
 
-# extternal libraries build
+# external libraries build
 add_subdirectory("lib")
 
 # project builds

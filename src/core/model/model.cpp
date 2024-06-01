@@ -1,9 +1,9 @@
 #include "model.hpp"
 
-static void load_mesh(aiMesh *mesh, const aiScene *scene, trimana_core::model *loading_model)
+static void load_mesh(aiMesh *mesh, const aiScene *scene, TrimanaCore::model *loading_model)
 {
     static unsigned int mesh_index = 0;
-    trimana_core::mesh *mesh_data = new trimana_core::mesh();
+    TrimanaCore::mesh *mesh_data = new TrimanaCore::mesh();
     mesh_data->mesh_index = mesh_index++;
 
     // Importing vertices and normals
@@ -72,14 +72,14 @@ static void load_mesh(aiMesh *mesh, const aiScene *scene, trimana_core::model *l
     }
     else
     {
-        mesh_data->material_index = GL_ZERO;
+        mesh_data->material_index = NULL;
         mesh_data->no_texture = true;
     }
 
     loading_model->meshes.emplace_back(mesh_data);
 }
 
-static void load_node(aiNode* node, const aiScene* scene, trimana_core::model* loading_model)
+static void load_node(aiNode* node, const aiScene* scene, TrimanaCore::model* loading_model)
 {
 	for (unsigned int i = 0; i < node->mNumMeshes; i++)
 	{
@@ -92,7 +92,7 @@ static void load_node(aiNode* node, const aiScene* scene, trimana_core::model* l
 	}
 }
 
-static void QGL_LoadMaterials(const aiScene* scene, trimana_core::model* loading_model)
+static void QGL_LoadMaterials(const aiScene* scene, TrimanaCore::model* loading_model)
 {
 	loading_model->textures.resize(scene->mNumMaterials);
 
@@ -111,12 +111,12 @@ static void QGL_LoadMaterials(const aiScene* scene, trimana_core::model* loading
 
                 // [TODO]: enter the correct path
 				std::string texPath = std::string("Resources/Textures/") + filename; 
-				texture_loc texture = trimana_core::load_texture(texPath, trimana_core::COLOR_CHANNELS::RGBA);
+				TextureLocation texture = TrimanaCore::LoadTexture(texPath, TrimanaCore::COLOR_CHANNELS::RGBA);
 
 				if (!texture)
 				{
 					LOG_ERROR("Unable to load texture : {0} (loading with default textures)", texPath);
-					texture = trimana_core::load_texture("Resources/Textures/plain.png", trimana_core::COLOR_CHANNELS::RGBA);
+					texture = TrimanaCore::LoadTexture("Resources/Textures/plain.png", TrimanaCore::COLOR_CHANNELS::RGBA);
 					loading_model->textures[materialIndex] = texture;
 					break;
 				}

@@ -3,11 +3,11 @@
 #include <functional>
 #include "utils/logger.hpp"
 
-#define SET_ONEVENT_CALLBACK(func) std::bind(&func, this, std::placeholders::_1)
+#define ONEVENT_CALLBACK(func) std::bind(&func, this, std::placeholders::_1)
 
-namespace trimana_core
+namespace TrimanaCore
 {
-    enum EVENT_CATEGORY : int
+    enum class EventCategory
     {
         EVENT_WINDOW,
         EVENT_KEYBOARD,
@@ -15,7 +15,7 @@ namespace trimana_core
         EVENT_UNKNOWN
     };
 
-    enum EVENT_TYPE : int
+    enum class EventType
     {
         EVENT_WINDOW_RESIZE,
         EVENT_WINDOW_CLOSE,
@@ -37,50 +37,50 @@ namespace trimana_core
     };
 
 #define EVENT_TYPE_CATEGORY(type, category)                                    \
-    static EVENT_TYPE get_static_type() { return type; }                       \
-    virtual EVENT_TYPE get_type() const override { return get_static_type(); } \
-    virtual EVENT_CATEGORY get_category() const override { return category; }
+    static EventType GetStaticType() { return type; }                       \
+    virtual EventType GetType() const override { return GetStaticType(); } \
+    virtual EventCategory GetCategory() const override { return category; }
 
 #ifdef _DEBUG
 
 #define EVENT_CAN_LOG             \
-    virtual void log_event() = 0; \
-    virtual const char *get_name() const = 0;
+    virtual void LogEvent() = 0; \
+    virtual const char *GetEventString() const = 0;
 
 #define EVENT_LOG(name, ...)                                        \
-    virtual const char *get_name() const override { return #name; } \
-    virtual void log_event() override { LOG_INFO(__VA_ARGS__); }
+    virtual const char *GetEventString() const override { return #name; } \
+    virtual void LogEvent() override { LOG_INFO(__VA_ARGS__); }
 
 #else
 #define EVENT_CAN_LOG
 #define EVENT_LOG(name, ...) // None
 #endif
 
-    class events
+    class TRIMANA_CORE Events
     {
     public:
-        events() = default;
-        virtual ~events() = default;
-        virtual EVENT_TYPE get_type() const = 0;
-        virtual EVENT_CATEGORY get_category() const = 0;
+        Events() = default;
+        virtual ~Events() = default;
+        virtual EventType GetType() const = 0;
+        virtual EventCategory GetCategory() const = 0;
         EVENT_CAN_LOG
 
     public:
-        bool is_handled{false};
+        bool IsHandled{false};
     };
 
-    class events_handler
+    class TRIMANA_CORE EventsHandler
     {
     public:
-        events_handler(events &event) : m_event(event) {}
-        ~events_handler() = default;
+        EventsHandler(Events &event) : mEvent(event) {}
+        ~EventsHandler() = default;
 
         template <typename T, typename FUNC>
-        bool disspatch(const FUNC &func)
+        bool Disspatch(const FUNC &func)
         {
-            if (m_event.get_type() == T::get_static_type())
+            if (mEvent.get_type() == T::get_static_type())
             {
-                m_event.is_handled |= func(static_cast<T &>(m_event));
+                mEvent.IsHandled |= func(static_cast<T &>(mEvent));
                 return true;
             }
 
@@ -88,8 +88,8 @@ namespace trimana_core
         }
 
     private:
-        events &m_event;
+        Events &mEvent;
     };
 
-    using event_callback_func = std::function<void(events &)>;
+    using EventCallbackFunc = std::function<void(Events &)>;
 }

@@ -10,47 +10,44 @@
 #include <glm/gtx/vector_angle.hpp>
 
 #include "utils/logger.hpp"
-
-#define GL_ZERO 0
-#define GL_ZEROF 0.0f
 #define GL_UNBIND 0
 
-typedef unsigned int shader_program;
-typedef unsigned int vertex_shader;
-typedef unsigned int fragment_shader;
-typedef unsigned int vertex_buff_loc;
-typedef unsigned int vertex_attr_ptr;
-typedef unsigned int element_buff_loc;
-typedef unsigned int *element_buff_data;
-typedef float        *vertex_buff_data;
-typedef unsigned int texture_loc;
-typedef unsigned int uniform_var_loc;
-typedef unsigned int frame_buff_loc;
-typedef unsigned int depth_buff_loc;
+typedef unsigned int ShaderProgram;
+typedef unsigned int VertexShader;
+typedef unsigned int FragmentShader;
+typedef unsigned int VertexBufferLoc;
+typedef unsigned int VertexAttributePtr;
+typedef unsigned int ElementBufferLoc;
+typedef unsigned int *ElementBufferData;
+typedef float        *VertexBufferData;
+typedef unsigned int TextureLocation;
+typedef unsigned int UniformVarLoc;
+typedef unsigned int FrameBufferLoc;
+typedef unsigned int DepthBufferLoc;
 
-namespace trimana_core
+namespace TrimanaCore
 {
-    struct gl_info
+    struct GLInfo
     {
-        std::string gl_version{"Unknown"};
-        std::string gl_vendor{"Unknown"};
-        std::string gl_renderer{"Unknown"};
-        std::string glsl_version{"#versio ?.?.?"};
-        bool gl_load_success{false};
+        std::string GLVersion{"Unknown"};
+        std::string GLVendor{"Unknown"};
+        std::string GLRenderer{"Unknown"};
+        std::string GLSLVersion{"#versio ?.?.?"};
+        bool GL_LoadSuccess{false};
     };
 
-    enum SHADER_TYPE : unsigned int
+    enum class SHADER_TYPE
     {
-        VERTEX_SHADER = GL_VERTEX_SHADER,
+        VERTEX_SHADER   = GL_VERTEX_SHADER,
         FRAGMENT_SHADER = GL_FRAGMENT_SHADER
     };
 
     enum class VERTEX_BUFFER_TYPE
     {
-        VERTEX_BUFFER = 0x1,
-        COLOR_BUFFER = 0x2,
-        TEXTURE_BUFFER = 0x3,
-        NORMALS_BUFFER = 0x4
+        VERTEX_BUFFER   = 0x1,
+        COLOR_BUFFER    = 0x2,
+        TEXTURE_BUFFER  = 0x3,
+        NORMALS_BUFFER  = 0x4
     };
 
     enum class ELEMENT_BUFFER_TYPE
@@ -58,98 +55,98 @@ namespace trimana_core
         INDICES_BUFFER = 0x1
     };
 
-    enum COMPONENT_TYPE : int
+    enum class COMPONENT_TYPE
     {
-        COM_TY_XY = 0x2,
-        COM_TY_XYZ = 0x3,
-        COM_TY_RGB = 0x3,
-        COM_TY_RGBA = 0x4,
-        COM_TY_UV = 0x2
+        COM_TY_XY       = 0x2,
+        COM_TY_XYZ      = 0x3,
+        COM_TY_RGB      = 0x3,
+        COM_TY_RGBA     = 0x4,
+        COM_TY_UV       = 0x2
     };
 
-    enum DATA_TYPE : unsigned int
+    enum class DATA_TYPE
     {
-        FLOAT_TY = GL_FLOAT,
-        UINT_TY = GL_UNSIGNED_INT,
-        INT_TY = GL_INT
+        FLOAT_TY    = GL_FLOAT,
+        UINT_TY     = GL_UNSIGNED_INT,
+        INT_TY      = GL_INT
     };
 
-    enum DRAW_TYPE : unsigned int
+    enum class DRAW_TYPE
     {
-        DRAW_STATIC = GL_STATIC_DRAW,
-        DRAW_DYNAMIC = GL_DYNAMIC_DRAW
+        DRAW_STATIC     = GL_STATIC_DRAW,
+        DRAW_DYNAMIC    = GL_DYNAMIC_DRAW
     };
 
-    enum DRAW_CALLS : unsigned int
+    enum class DRAW_CALLS
     {
-        DRAW_POINTS = GL_POINTS,
-        DRAW_TRIANGLES = GL_TRIANGLES,
-        DRAW_LINES = GL_LINES
+        DRAW_POINTS         = GL_POINTS,
+        DRAW_TRIANGLES      = GL_TRIANGLES,
+        DRAW_LINES          = GL_LINES
     };
 
-    enum COLOR_CHANNELS : int
+    enum class COLOR_CHANNELS
     {
-        RGB = 0x3,
-        RGBA = 0x4
+        RGB     = 0x3,
+        RGBA    = 0x4
     };
 
-    class shader
-    {
-    public:
-        shader() = default;
-        ~shader() = default;
-
-        shader_program shader_prog{GL_ZERO};
-        vertex_shader vertex_shader_prog{GL_ZERO};
-        fragment_shader fragment_shader_prog{GL_ZERO};
-
-        std::string vertex_shader_code{"undefine"};
-        std::string fragment_shader_code{"undefine"};
-
-        bool shader_program_created{false};
-    };
-
-    class vertex_buffers
+    class TRIMANA_CORE Shader
     {
     public:
-        vertex_buffers() = default;
-        ~vertex_buffers() = default;
+        Shader() = default;
+        ~Shader() = default;
 
-        vertex_buff_loc vertex_buff{GL_ZERO};
-        vertex_buff_loc color_buff{GL_ZERO};
-        vertex_buff_loc texture_buff{GL_ZERO};
-        vertex_buff_loc normals_buff{GL_ZERO};
-        vertex_attr_ptr vertex_arry_ptr{GL_ZERO};
-        element_buff_loc element_buff{GL_ZERO};
-        unsigned int indices_count{GL_ZERO};
+        ShaderProgram ShderProgramSelf{NULL};
+        VertexShader VertexShaderProgram{NULL};
+        FragmentShader FragmentShaderProgram{NULL};
+
+        std::string VertexShaderCode{"undefine"};
+        std::string FragmentShaderCode{"undefine"};
+
+        bool ShaderProgramCreated{false};
     };
 
-    vertex_buffers *generate_buffers(unsigned int num_buffers);
-    void assign_vertex_data(vertex_buffers *buffers, VERTEX_BUFFER_TYPE vtype, vertex_buff_data data, GLsizeiptr size, DRAW_TYPE dtype);
-    void assign_element_data(vertex_buffers *buffers, element_buff_data data, GLsizeiptr size, DRAW_TYPE dtype);
-    void link_vertex_buffers(vertex_buffers *buffers, shader_program &program, const std::string &attr, VERTEX_BUFFER_TYPE vtype, COMPONENT_TYPE ctype);
-    void link_buffer_layout(unsigned int layout, vertex_buffers *buffers, VERTEX_BUFFER_TYPE vtype, COMPONENT_TYPE ctype);
-    void link_element_buffers(vertex_buffers *buffer);
-    void render(vertex_buffers *buffers, DRAW_CALLS dcall);
-    void delete_buffers(vertex_buffers *buffers, unsigned int num_buffers_used);
+    class TRIMANA_CORE VertexBuffers
+    {
+    public:
+        VertexBuffers() = default;
+        ~VertexBuffers() = default;
 
-    uniform_var_loc get_uniform_loc(shader_program &program, const std::string &uniform_val);
-    shader *create_shader_program(const std::string &vshader, const std::string &fshader);
-    void shader_attach(shader_program &program);
-    void shader_dettach();
-    bool delete_shaders_n_program(shader* programs);
+        VertexBufferLoc VertexBuff{NULL};
+        VertexBufferLoc ColorBuff{NULL};
+        VertexBufferLoc TextureBuff{NULL};
+        VertexBufferLoc NormalsBuff{NULL};
+        ElementBufferLoc element_buff{NULL};
+        VertexAttributePtr VertexArryPtr{NULL};
+        unsigned int IndicesCount{NULL};
+    };
 
-    bool update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, int data);
-    bool update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, unsigned int data);
-    bool update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, float data);
-    bool update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, float x, float y);
-    bool update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, float x, float y, float z);
-    bool update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, float x, float y, float z, float w);
-    bool update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, glm::mat4 &data);
-    bool update_uniform(shader *shdr, SHADER_TYPE type, const std::string &uniform, glm::mat3 &data);
+    VertexBuffers *GenerateBuffers(unsigned int num_buffers);
+    void AssignVertexBufferData(VertexBuffers *buffers, VERTEX_BUFFER_TYPE vtype, VertexBufferData data, GLsizeiptr size, DRAW_TYPE dtype);
+    void AssignElementBufferData(VertexBuffers *buffers, ElementBufferData data, GLsizeiptr size, DRAW_TYPE dtype);
+    void LinkVertexBuffers(VertexBuffers *buffers, ShaderProgram &program, const std::string &attr, VERTEX_BUFFER_TYPE vtype, COMPONENT_TYPE ctype);
+    void LinkBufferLayout(unsigned int layout, VertexBuffers *buffers, VERTEX_BUFFER_TYPE vtype, COMPONENT_TYPE ctype);
+    void LinkElementBuffers(VertexBuffers *buffer);
+    void Render(VertexBuffers *buffers, DRAW_CALLS dcall);
+    void DeleteBuffers(VertexBuffers *buffers, unsigned int num_buffers_used);
 
-    texture_loc load_texture(const std::string &loc, COLOR_CHANNELS channels, bool flip = true);
-    void texture_attach(texture_loc &texture);
-    void texture_dettach();
-    void delete_texture(texture_loc &texture);
+    UniformVarLoc GetUniformLoc(ShaderProgram &program, const std::string &uniform_val);
+    Shader *CreateShaderProgram(const std::string &vshader, const std::string &fshader);
+    void ShaderAttach(ShaderProgram &program);
+    void ShaderDettach();
+    bool DeleteShaders_N_Programs(Shader* programs);
+
+    bool UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const std::string &uniform, int data);
+    bool UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const std::string &uniform, unsigned int data);
+    bool UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const std::string &uniform, float data);
+    bool UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const std::string &uniform, float x, float y);
+    bool UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const std::string &uniform, float x, float y, float z);
+    bool UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const std::string &uniform, float x, float y, float z, float w);
+    bool UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const std::string &uniform, glm::mat4 &data);
+    bool UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const std::string &uniform, glm::mat3 &data);
+
+    TextureLocation LoadTexture(const std::string &loc, COLOR_CHANNELS channels, bool flip = true);
+    void TextureAttach(TextureLocation &texture);
+    void TextureDettach();
+    void DeleteTexture(TextureLocation &texture);
 };

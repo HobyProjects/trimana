@@ -6,12 +6,14 @@ set(
 
 set(
     TRIMANA_CORE_HEADERS
-    ${PROJECT_SOURCE_DIR}/src/core/entry/init_core.hpp
+    ${PROJECT_SOURCE_DIR}/src/core/entry/core.hpp
     ${PROJECT_SOURCE_DIR}/src/core/utils/logger.hpp
+    ${PROJECT_SOURCE_DIR}/src/core/utils/platform.hpp
     ${PROJECT_SOURCE_DIR}/src/core/events/events.hpp
     ${PROJECT_SOURCE_DIR}/src/core/events/events_window.hpp
     ${PROJECT_SOURCE_DIR}/src/core/events/events_mouse.hpp
     ${PROJECT_SOURCE_DIR}/src/core/events/events_keyboard.hpp
+    ${PROJECT_SOURCE_DIR}/src/core/window/sdl_window.hpp
     ${PROJECT_SOURCE_DIR}/src/core/window/window.hpp
     ${PROJECT_SOURCE_DIR}/src/core/renders/GL/gl.hpp
     ${PROJECT_SOURCE_DIR}/src/core/model/model.hpp
@@ -21,8 +23,7 @@ set(
 
 set(
     TRIMANA_CORE_SOURCES
-    ${PROJECT_SOURCE_DIR}/src/core/entry/init_core.cpp
-    ${PROJECT_SOURCE_DIR}/src/core/window/window.cpp
+    ${PROJECT_SOURCE_DIR}/src/core/entry/core.cpp
     ${PROJECT_SOURCE_DIR}/src/core/renders/GL/gl.cpp
     ${PROJECT_SOURCE_DIR}/src/core/model/model.cpp
 )

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <spdlog/spdlog.h>
+#include "platform.hpp"
 
 #ifdef _DEBUG
 #define LOG_CRITICAL(...) spdlog::critical(__VA_ARGS__)

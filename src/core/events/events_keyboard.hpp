@@ -2,50 +2,50 @@
 
 #include "events.hpp"
 
-namespace trimana_core
+namespace TrimanaCore
 {
-    class event_keyboard_key_press : public events
+    class TRIMANA_CORE KeyboardKeyPressEvent : public Events
     {
     public:
-        event_keyboard_key_press(int key_code) : m_key_code(key_code) {}
-        virtual ~event_keyboard_key_press() = default;
+        KeyboardKeyPressEvent(int key_code) : mKeyCode(key_code) {}
+        virtual ~KeyboardKeyPressEvent() = default;
 
-        EVENT_TYPE_CATEGORY(EVENT_KEYBOARD_KEY_PRESS, EVENT_KEYBOARD);
-        EVENT_LOG(EVENT_KEYBOARD_KEY_PRESS, "{0}", get_name());
+        EVENT_TYPE_CATEGORY(EventType::EVENT_KEYBOARD_KEY_PRESS, EventCategory::EVENT_KEYBOARD);
+        EVENT_LOG(EventType::EVENT_KEYBOARD_KEY_PRESS, "{0}", GetEventString());
 
-        int get_key_code() const { return m_key_code; }
+        int GetKeyCode() const { return mKeyCode; }
 
     private:
-        int m_key_code{NULL};
+        int mKeyCode{NULL};
     };
 
-    class event_keyboard_key_release : public events
+    class TRIMANA_CORE KeyboardKeyReleaseEvent : public Events
     {
     public:
-        event_keyboard_key_release(int key_code) : m_key_code(key_code) {}
-        virtual ~event_keyboard_key_release() = default;
+        KeyboardKeyReleaseEvent(int key_code) : mKeyCode(key_code) {}
+        virtual ~KeyboardKeyReleaseEvent() = default;
 
-        EVENT_TYPE_CATEGORY(EVENT_KEYBOARD_KEY_RELEASE, EVENT_KEYBOARD);
-        EVENT_LOG(EVENT_KEYBOARD_KEY_RELEASE, "{0}", get_name());
+        EVENT_TYPE_CATEGORY(EventType::EVENT_KEYBOARD_KEY_RELEASE, EventCategory::EVENT_KEYBOARD);
+        EVENT_LOG(EventType::EVENT_KEYBOARD_KEY_RELEASE, "{0}", GetEventString());
 
-        int get_key_code() const { return m_key_code; }
+        int GetKeyCode() const { return mKeyCode; }
 
     private:
-        int m_key_code{NULL};
+        int mKeyCode{NULL};
     };
 
-    class event_keyboard_key_hold : public events
+    class TRIMANA_CORE KeyboardKeyHold : public Events
     {
     public:
-        event_keyboard_key_hold(int key_code) : m_key_code(key_code) {}
-        virtual ~event_keyboard_key_hold() = default;
+        KeyboardKeyHold(int key_code) : mKeyCode(key_code) {}
+        virtual ~KeyboardKeyHold() = default;
 
-        EVENT_TYPE_CATEGORY(EVENT_KEYBOARD_KEY_HOLD, EVENT_KEYBOARD);
-        EVENT_LOG(EVENT_KEYBOARD_KEY_HOLD, "{0}", get_name());
+        EVENT_TYPE_CATEGORY(EventType::EVENT_KEYBOARD_KEY_HOLD, EventCategory::EVENT_KEYBOARD);
+        EVENT_LOG(EventType::EVENT_KEYBOARD_KEY_HOLD, "{0}", GetEventString());
 
-        int get_key_code() const { return m_key_code; }
+        int GetKeyCode() const { return mKeyCode; }
 
     private:
-        int m_key_code{NULL};
+        int mKeyCode{NULL};
     };
 }

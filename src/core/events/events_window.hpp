@@ -2,106 +2,106 @@
 
 #include "events.hpp"
 
-namespace trimana_core
+namespace TrimanaCore
 {
-    class event_window_resize : public events
+    class TRIMANA_CORE WindowResizeEvent : public Events
     {
     public:
-        event_window_resize(int width, int height) : m_width(width), m_height(height) {}
-        virtual ~event_window_resize() = default;
+        WindowResizeEvent(int width, int height) : mWidth(width), mHeight(height) {}
+        virtual ~WindowResizeEvent() = default;
 
-        EVENT_TYPE_CATEGORY(EVENT_WINDOW_RESIZE, EVENT_WINDOW);
-        EVENT_LOG(EVENT_WINDOW_RESIZE, "{0} : {1}, {2}", get_name(), m_width, m_height);
+        EVENT_TYPE_CATEGORY(EventType::EVENT_WINDOW_RESIZE, EventCategory::EVENT_WINDOW);
+        EVENT_LOG(EventType::EVENT_WINDOW_RESIZE, "{0} : {1}, {2}", GetEventString(), mWidth, mHeight);
 
-        int get_width() const { return m_width; }
-        int get_height() const { return m_height; }
+        int GetWidth() const { return mWidth; }
+        int GetHeight() const { return mHeight; }
 
     private:
-        int m_width{NULL};
-        int m_height{NULL};
+        int mWidth{NULL};
+        int mHeight{NULL};
     };
 
-    class event_window_viewport_resize : public events
+    class TRIMANA_CORE ViewportResizeEvent : public Events
     {
     public:
-        event_window_viewport_resize(int width, int height) : m_width(width), m_height(height) {}
-        virtual ~event_window_viewport_resize() = default;
+        ViewportResizeEvent(int width, int height) : mWidth(width), mHeight(height) {}
+        virtual ~ViewportResizeEvent() = default;
 
-        EVENT_TYPE_CATEGORY(EVENT_WINDOW_VIEWPORT_RESIZE, EVENT_WINDOW);
-        EVENT_LOG(EVENT_WINDOW_VIEWPORT_RESIZE, "{0} : {1} , {2}", get_name(), m_width, m_height);
+        EVENT_TYPE_CATEGORY(EventType::EVENT_WINDOW_VIEWPORT_RESIZE, EventCategory::EVENT_WINDOW);
+        EVENT_LOG(EventType::EVENT_WINDOW_VIEWPORT_RESIZE, "{0} : {1} , {2}", GetEventString(), mWidth, mHeight);
 
-        int get_width() const { return m_width; }
-        int get_height() const { return m_height; }
+        int GetWidth() const { return mWidth; }
+        int GetHeight() const { return mHeight; }
 
     private:
-        int32_t m_width{NULL};
-        int32_t m_height{NULL};
+        int mWidth{NULL};
+        int mHeight{NULL};
     };
 
-    class event_window_close : public events
+    class TRIMANA_CORE WindowCloseEvent : public Events
     {
     public:
-        event_window_close() = default;
-        virtual ~event_window_close() = default;
+        WindowCloseEvent() = default;
+        virtual ~WindowCloseEvent() = default;
 
-        EVENT_TYPE_CATEGORY(EVENT_WINDOW_CLOSE, EVENT_WINDOW);
-        EVENT_LOG(EVENT_WINDOW_CLOSE, "{0}", get_name());
+        EVENT_TYPE_CATEGORY(EventType::EVENT_WINDOW_CLOSE, EventCategory::EVENT_WINDOW);
+        EVENT_LOG(EventType::EVENT_WINDOW_CLOSE, "{0}", GetEventString());
     };
 
-    class event_window_pos_change : public events
+    class TRIMANA_CORE WindowMoveEvent : public Events
     {
     public:
-        event_window_pos_change(int pos_x, int pos_y) : m_posx(pos_x), m_posy(pos_y) {}
-        virtual ~event_window_pos_change() = default;
+        WindowMoveEvent(int pos_x, int pos_y) : mPosX(pos_x), mPosY(pos_y) {}
+        virtual ~WindowMoveEvent() = default;
 
-        EVENT_TYPE_CATEGORY(EVENT_WINDOW_POS_CHANGED, EVENT_WINDOW);
-        EVENT_LOG(EVENT_WINDOW_POS_CHANGED, EVENT_WINDOW);
+        EVENT_TYPE_CATEGORY(EventType::EVENT_WINDOW_POS_CHANGED, EventCategory::EVENT_WINDOW);
+        EVENT_LOG(EventType::EVENT_WINDOW_POS_CHANGED, "{0} : {1}, {2}", GetEventString(), mPosX, mPosY);
 
-        int get_posx() const { return m_posx; }
-        int get_posy() const { return m_posy; }
+        int GetPosX() const { return mPosX; }
+        int GetPosY() const { return mPosY; }
 
     private:
-        int m_posx{NULL};
-        int m_posy{NULL};
+        int mPosX{NULL};
+        int mPosY{NULL};
     };
 
-    class event_window_minimize : public events
+    class TRIMANA_CORE WindowMinimizeEvent : public Events
     {
     public:
-        event_window_minimize() = default;
-        virtual ~event_window_minimize() = default;
+        WindowMinimizeEvent() = default;
+        virtual ~WindowMinimizeEvent() = default;
 
-        EVENT_TYPE_CATEGORY(EVENT_WINDOW_MINIMIZED, EVENT_WINDOW)
-        EVENT_LOG(EVENT_WINDOW_MINIMIZED, "{0}", get_name());
+        EVENT_TYPE_CATEGORY(EventType::EVENT_WINDOW_MINIMIZED, EventCategory::EVENT_WINDOW);
+        EVENT_LOG(EventType::EVENT_WINDOW_MINIMIZED, "{0}", GetEventString());
     };
 
-    class event_window_maximize : public events
+    class TRIMANA_CORE WindowMaximizeEvent : public Events
     {
     public:
-        event_window_maximize() = default;
-        virtual ~event_window_maximize() = default;
+        WindowMaximizeEvent() = default;
+        virtual ~WindowMaximizeEvent() = default;
 
-        EVENT_TYPE_CATEGORY(EVENT_WINDOW_MAXIMIZED, EVENT_WINDOW)
-        EVENT_LOG(EVENT_WINDOW_MAXIMIZED, "{0}", get_name());
+        EVENT_TYPE_CATEGORY(EventType::EVENT_WINDOW_MAXIMIZED, EventCategory::EVENT_WINDOW)
+        EVENT_LOG(EventType::EVENT_WINDOW_MAXIMIZED, "{0}", GetEventString());
     };
 
-    class event_window_focus_lost : public events
+    class TRIMANA_CORE WindowFocusLostEvent : public Events
     {
     public:
-        event_window_focus_lost() = default;
-        virtual ~event_window_focus_lost() = default;
+        WindowFocusLostEvent() = default;
+        virtual ~WindowFocusLostEvent() = default;
 
-        EVENT_TYPE_CATEGORY(EVENT_WINDOW_FOCUS_LOST, EVENT_WINDOW);
-        EVENT_LOG(EVENT_WINDOW_FOCUS_LOST, "{0}", get_name());
+        EVENT_TYPE_CATEGORY(EventType::EVENT_WINDOW_FOCUS_LOST, EventCategory::EVENT_WINDOW);
+        EVENT_LOG(EventType::EVENT_WINDOW_FOCUS_LOST, "{0}", GetEventString());
     };
 
-    class event_window_focus_gain : public events
+    class TRIMANA_CORE WindowFocusGainEvent : public Events
     {
     public:
-        event_window_focus_gain() = default;
-        virtual ~event_window_focus_gain() = default;
+        WindowFocusGainEvent() = default;
+        virtual ~WindowFocusGainEvent() = default;
 
-        EVENT_TYPE_CATEGORY(EVENT_WINDOW_FOCUS_GAIN, EVENT_WINDOW);
-        EVENT_LOG(EVENT_WINDOW_FOCUS_GAIN, "{0}", get_name());
+        EVENT_TYPE_CATEGORY(EventType::EVENT_WINDOW_FOCUS_GAIN, EventCategory::EVENT_WINDOW);
+        EVENT_LOG(EvenetType::EVENT_WINDOW_FOCUS_GAIN, "{0}", GetEventString());
     };
 }
