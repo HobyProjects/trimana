@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <array>
 #include <SDL3/SDL.h>
 
 #include "entry\init_core.hpp"
