@@ -2,8 +2,9 @@
 
 bool TrimanaCore::Core::InitCore()
 {
+    Log::Init();
 
-#if defined(TRIMANA_PARIMARY_API__SDL) && defined(TRIMANA_PLATFORM_WINDOWS)
+#if defined(TRIMANA_PLATFORM_WINDOWS)
 
     if (SDL_Init(SDL_INIT_FLAGS) != 0)
     {
@@ -17,13 +18,20 @@ bool TrimanaCore::Core::InitCore()
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 4);
 
+        glewExperimental = true;
+        if (glewInit() != GL_TRUE)
+        {
+            TRIMANA_CORE_CRITICAL("UNABLE TO LOAD GL FUNCTIONS");
+            return false;
+        }
+
         mCoreInitSuccess = true;
         return true;
     }
 
 #endif
 
-    LOG_CRITICAL("SOMETHING WENT WRONG WHILE INITIALIZING SDL >> {0}", SDL_GetError());
+    TRIMANA_CORE_CRITICAL("SOMETHING WENT WRONG WHILE INITIALIZING SDL >> {0}", SDL_GetError());
     mCoreInitSuccess = false;
     return false;
 }
@@ -35,7 +43,7 @@ bool TrimanaCore::Core::CoreInitSuccess()
 
 bool TrimanaCore::Core::QuitCore()
 {
-#ifdef TRIMANA_PARIMARY_API__SDL
+#ifdef TRIMANA_PLATFORM_WINDOWS
     if (mCoreInitSuccess)
     {
         SDL_Quit();

@@ -8,42 +8,56 @@
 #include <glm/glm.hpp>
 
 #include "renders/GL/gl.hpp"
+#include "utils/platform.hpp"
+#include "utils/logger.hpp"
 
 namespace TrimanaCore
 {
-    struct vertexs
+    struct TRIMANA_CORE Vertexs
     {
-        glm::vec3 points;
-        glm::vec2 uvs;
-        glm::vec3 normals;
-        glm::vec3 colorRGB;
-        glm::vec4 colorRGBA;
+        glm::vec3 Points;
+        glm::vec2 UVs;
+        glm::vec3 Normals;
+        glm::vec4 ColorRGBA;
     };
 
-    struct mesh
+    struct TRIMANA_CORE Mesh
     {
-        mesh() = default;
-        ~mesh() = default;
+        Mesh() = default;
+        ~Mesh() = default;
 
-        std::vector<vertexs> vertices;
-        std::vector<unsigned int> indices;
+        std::vector<Vertexs> Vertices;
+        std::vector<unsigned int> Indices;
         
-        glm::mat4 mesh_self{1.0f};
+        glm::mat4 MeshSelf{1.0f};
 
-        unsigned int mesh_index{NULL};
-        unsigned int material_index{NULL}; 
-        bool no_texture{false};
+        unsigned int MeshIndex{NULL};
+        unsigned int MaterialIndex{NULL}; 
+        bool NoTextures{false};
     };
 
-    struct model
+    struct TRIMANA_CORE Model
     {
-        std::vector<mesh*> meshes;
-        std::vector<TextureLocation> textures;
-        VertexBuffers* buffers{nullptr};
-        Shader* ShaderProgram{nullptr};
-        bool ready_to_draw{false};
+        Model() = default;
+        ~Model() = default;
+
+        std::vector<std::shared_ptr<Mesh>> Meshes;
+        std::vector<TextureLocation> Textures;
+        bool ReadyToDraw{false};
     };
 
-    model* import_model(const std::string& model_file);
-    void delete_model(model* model_ptr);
+    class Renderer
+    {
+        public:
+            Renderer() = default;
+            ~Renderer() = default;
+
+        private:
+            std::shared_ptr<Shader> mShader;
+            std::shared_ptr<VertexBuffers> mBuffers;
+            std::vector<std::shared_ptr<Model>> mModels;
+    };
+
+    std::shared_ptr<Model> TRIMANA_CORE ImportModel(const std::string& model_file);
+    void TRIMANA_CORE DeleteModel(Model* model_ptr);
 }

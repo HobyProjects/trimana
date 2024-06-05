@@ -43,16 +43,16 @@ namespace TrimanaCore
 
 #ifdef _DEBUG
 
-#define EVENT_CAN_LOG             \
+#define EVENT_ALLOW_TO_DISPLAY             \
     virtual void LogEvent() = 0; \
     virtual const char *GetEventString() const = 0;
 
 #define EVENT_LOG(name, ...)                                        \
     virtual const char *GetEventString() const override { return #name; } \
-    virtual void LogEvent() override { LOG_INFO(__VA_ARGS__); }
+    virtual void LogEvent() override { TRIMANA_CORE_INFO(__VA_ARGS__); }
 
 #else
-#define EVENT_CAN_LOG
+#define EVENT_ALLOW_TO_DISPLAY
 #define EVENT_LOG(name, ...) // None
 #endif
 
@@ -63,7 +63,7 @@ namespace TrimanaCore
         virtual ~Events() = default;
         virtual EventType GetType() const = 0;
         virtual EventCategory GetCategory() const = 0;
-        EVENT_CAN_LOG
+        EVENT_ALLOW_TO_DISPLAY
 
     public:
         bool IsHandled{false};

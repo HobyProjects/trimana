@@ -1,10 +1,9 @@
-set(SDL_SHARED OFF)
-set(SDL_STATIC ON)
+set(SDL_SHARED ON)
+set(SDL_STATIC OFF)
 add_subdirectory("SDL" EXCLUDE_FROM_ALL)
 add_subdirectory("spdlog" EXCLUDE_FROM_ALL)
 
-set(GLM_BUILD_TESTS OFF)
-set(BUILD_SHARED_LIBS OFF)
+set(GLM_BUILD_TESTS ON)
 add_subdirectory("glm" EXCLUDE_FROM_ALL)
 
 set(glew-cmake_BUILD_STATIC ON)

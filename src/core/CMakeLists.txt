@@ -26,10 +26,12 @@ set(
     ${PROJECT_SOURCE_DIR}/src/core/entry/core.cpp
     ${PROJECT_SOURCE_DIR}/src/core/renders/GL/gl.cpp
     ${PROJECT_SOURCE_DIR}/src/core/model/model.cpp
+    ${PROJECT_SOURCE_DIR}/src/core/utils/logger.cpp
 )
 
+add_compile_definitions(TRIMANA_CORE_EXPORT)
 set(TRIMANA_CORE_LIBRARY "trimana-core")
-add_library(${TRIMANA_CORE_LIBRARY} STATIC ${TRIMANA_CORE_HEADERS} ${TRIMANA_CORE_SOURCES})
+add_library(${TRIMANA_CORE_LIBRARY} SHARED ${TRIMANA_CORE_HEADERS} ${TRIMANA_CORE_SOURCES})
 target_include_directories(${TRIMANA_CORE_LIBRARY} PUBLIC  ${TRIMANA_CORE_SRC_DIR})
 
 target_link_libraries(

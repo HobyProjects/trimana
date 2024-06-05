@@ -1,29 +1,26 @@
 #include "model.hpp"
 
-static void load_mesh(aiMesh *mesh, const aiScene *scene, TrimanaCore::model *loading_model)
+static void LoadMesh(aiMesh *mesh, const aiScene *scene, std::shared_ptr<TrimanaCore::Model> loading_model)
 {
     static unsigned int mesh_index = 0;
-    TrimanaCore::mesh *mesh_data = new TrimanaCore::mesh();
-    mesh_data->mesh_index = mesh_index++;
+    std::shared_ptr<TrimanaCore::Mesh> mesh_data = std::make_shared<TrimanaCore::Mesh>();
+    mesh_data->MeshIndex = mesh_index++;
 
     // Importing vertices and normals
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
         glm::vec3 points(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-        mesh_data->vertices[i].points = points;
+        mesh_data->Vertices[i].Points = points;
 
         glm::vec3 normals(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
-        mesh_data->vertices[i].normals = normals;
+        mesh_data->Vertices[i].Normals = normals;
     }
 
     // Color data (for now we go with a default color)
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
-        glm::vec3 color(1.0f, 1.0f, 1.0f);
         glm::vec4 colorA(1.0f, 1.0f, 1.0f, 1.0f);
-
-        mesh_data->vertices[i].colorRGB = color;
-        mesh_data->vertices[i].colorRGBA = colorA;
+        mesh_data->Vertices[i].ColorRGBA = colorA;
     }
 
     // Texture coords
@@ -37,7 +34,7 @@ static void load_mesh(aiMesh *mesh, const aiScene *scene, TrimanaCore::model *lo
                 for (unsigned int j = 0; j < mesh->mNumVertices; j++)
                 {
                     glm::vec2 tex_uv(mesh->mTextureCoords[i][j].x, mesh->mTextureCoords[i][j].y);
-                    mesh_data->vertices[j].uvs = tex_uv;
+                    mesh_data->Vertices[j].UVs = tex_uv;
                 }
             }
             else
@@ -51,7 +48,7 @@ static void load_mesh(aiMesh *mesh, const aiScene *scene, TrimanaCore::model *lo
         for (unsigned int j = 0; j < mesh->mNumVertices; j++)
         {
             glm::vec2 tex_uv(0.0f, 0.0f);
-            mesh_data->vertices[j].uvs = tex_uv;
+            mesh_data->Vertices[j].UVs = tex_uv;
         }
     }
 
@@ -61,40 +58,40 @@ static void load_mesh(aiMesh *mesh, const aiScene *scene, TrimanaCore::model *lo
         aiFace face = mesh->mFaces[i];
         for(unsigned int j = 0; j < face.mNumIndices; i++)
         {
-            mesh_data->indices.emplace_back(face.mIndices[i]);
+            mesh_data->Indices.emplace_back(face.mIndices[i]);
         }
     }
 
     if(mesh->HasTextureCoords(0))
     {
-        mesh_data->material_index = mesh->mMaterialIndex;
-        mesh_data->no_texture = false;
+        mesh_data->MaterialIndex = mesh->mMaterialIndex;
+        mesh_data->NoTextures = false;
     }
     else
     {
-        mesh_data->material_index = NULL;
-        mesh_data->no_texture = true;
+        mesh_data->MaterialIndex = NULL;
+        mesh_data->NoTextures = true;
     }
 
-    loading_model->meshes.emplace_back(mesh_data);
+    loading_model->Meshes.emplace_back(mesh_data);
 }
 
-static void load_node(aiNode* node, const aiScene* scene, TrimanaCore::model* loading_model)
+static void LoadNode(aiNode* node, const aiScene* scene, std::shared_ptr<TrimanaCore::Model> loading_model)
 {
 	for (unsigned int i = 0; i < node->mNumMeshes; i++)
 	{
-		load_mesh(scene->mMeshes[node->mMeshes[i]], scene, loading_model);
+		LoadMesh(scene->mMeshes[node->mMeshes[i]], scene, loading_model);
 	}
 
 	for (unsigned int i = 0; i < node->mNumChildren; i++)
 	{
-		load_node(node->mChildren[i], scene, loading_model);
+		LoadNode(node->mChildren[i], scene, loading_model);
 	}
 }
 
-static void QGL_LoadMaterials(const aiScene* scene, TrimanaCore::model* loading_model)
+static void LoadMaterials(const aiScene* scene, std::shared_ptr<TrimanaCore::Model> loading_model)
 {
-	loading_model->textures.resize(scene->mNumMaterials);
+	loading_model->Textures.resize(scene->mNumMaterials);
 
 	for (unsigned int materialIndex = 0; materialIndex < scene->mNumMaterials; materialIndex++)
 	{
@@ -115,15 +112,70 @@ static void QGL_LoadMaterials(const aiScene* scene, TrimanaCore::model* loading_
 
 				if (!texture)
 				{
-					LOG_ERROR("Unable to load texture : {0} (loading with default textures)", texPath);
+					TRIMANA_CORE_ERROR("Unable to load texture : {0} (loading with default textures)", texPath);
 					texture = TrimanaCore::LoadTexture("Resources/Textures/plain.png", TrimanaCore::COLOR_CHANNELS::RGBA);
-					loading_model->textures[materialIndex] = texture;
+					loading_model->Textures[materialIndex] = texture;
 					break;
 				}
 
-				LOG_INFO("Texture Loading success : {0}", texPath);
-				loading_model->textures[materialIndex] = texture;
+				TRIMANA_CORE_INFO("Texture Loading success : {0}", texPath);
+				loading_model->Textures[materialIndex] = texture;
 			}
 		}
 	}
+}
+
+ std::shared_ptr<TrimanaCore::Model> TrimanaCore::ImportModel(const std::string& model_file)
+{
+    TRIMANA_CORE_INFO("IMPORTING MODEL {0}", model_file.c_str());
+    std::shared_ptr<Model> model = std::make_shared<Model>();
+    Assimp::Importer model_importer;
+    const aiScene* scene = model_importer.ReadFile(model_file, (aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices));
+
+    if(scene != nullptr)
+    {
+        LoadNode(scene->mRootNode, scene, model.);
+        LoadMaterials(scene, model);
+
+        if(!model->Meshes.empty())
+        {
+            return model;
+        }
+        else
+        {
+            TRIMANA_CORE_ERROR("UNABLE TO IMPORT {0} MODEL, SOMETHING WENT WRONG WHILE IMPORTING..");
+            return nullptr;
+        }
+    }
+    else
+    {
+        TRIMANA_CORE_ERROR("UNABLE TO IMPORT {0} MODEL, SOMETHING WENT WRONG WHILE IMPORTING..");
+        TRIMANA_CORE_CRITICAL(model_importer.GetErrorString());
+        return nullptr;
+    }
+}
+
+void TrimanaCore::DeleteModel(Model* model_ptr)
+{
+    if (!model_ptr->Meshes.empty())
+	{
+		for (auto mesh : model_ptr->Meshes)
+		{
+			delete mesh;
+		}
+	}
+
+	if (!model_ptr->Textures.empty())
+	{
+		for (auto texture : model_ptr->Textures)
+		{
+			DeleteTexture(texture);
+			texture = NULL;
+		}
+	}
+
+    if(model_ptr->VBuffers != nullptr)
+    {
+        
+    }
 }

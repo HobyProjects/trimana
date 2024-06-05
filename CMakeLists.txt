@@ -14,7 +14,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # cmake settings
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-set(BUILD_SHARED_LIBS OFF)
+set(BUILD_SHARED_LIBS ON)
 set(CMAKE_BUILD_TYPE "Debug")
 
 # external libraries build
@@ -22,4 +22,4 @@ add_subdirectory("lib")
 
 # project builds
 add_subdirectory("src/core")
-add_subdirectory("src/entry_point")
+add_subdirectory("src/engine")
