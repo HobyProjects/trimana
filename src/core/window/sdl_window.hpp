@@ -265,7 +265,5 @@ namespace TrimanaCore
 
     private:
         WinProp<API_Window> *mWinProp{nullptr};
-        WinEventsHandler<API_EventHandler> mWindowEventHandler;
-        EventCallbackFunc mCallBackFunc;
     };
 }
