@@ -5,7 +5,7 @@
 
 namespace TrimanaCore
 {
-    class TRIMANA_CORE Log
+    class Log
     {
         public:
             static void Init();
