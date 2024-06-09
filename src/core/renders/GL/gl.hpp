@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <string>
+#include <sstream>
 
 #include <gl/glew.h>
 #include <glm/glm.hpp>
@@ -10,6 +11,8 @@
 #include <glm/gtx/vector_angle.hpp>
 
 #include "utils/logger.hpp"
+
+#define GL_DEFAULT_GENERATE_BUFFERS 1
 #define GL_UNBIND 0
 
 typedef unsigned int ShaderProgramLoc;
@@ -29,6 +32,9 @@ namespace TrimanaCore
 {
     struct TRIMANA_CORE GLInfo
     {
+        GLInfo() = default;
+        ~GLInfo() = default;
+
         std::string GLVersion{"Unknown"};
         std::string GLVendor{"Unknown"};
         std::string GLRenderer{"Unknown"};
@@ -36,18 +42,21 @@ namespace TrimanaCore
         bool GL_LoadSuccess{false};
     };
 
+    inline std::shared_ptr<GLInfo> GetGLInfo();
+
     enum class SHADER_TYPE
     {
-        VERTEX_SHADER = GL_VERTEX_SHADER,
+        SHADER_PROGRAM  = 0x0,
+        VERTEX_SHADER   = GL_VERTEX_SHADER,
         FRAGMENT_SHADER = GL_FRAGMENT_SHADER
     };
 
     enum class VERTEX_BUFFER_TYPE
     {
-        VERTEX_BUFFER = 0x1,
-        COLOR_BUFFER = 0x2,
-        TEXTURE_BUFFER = 0x3,
-        NORMALS_BUFFER = 0x4
+        VERTEX_BUFFER   = 0x1,
+        COLOR_BUFFER    = 0x2,
+        TEXTURE_BUFFER  = 0x3,
+        NORMALS_BUFFER  = 0x4
     };
 
     enum class ELEMENT_BUFFER_TYPE
@@ -57,31 +66,31 @@ namespace TrimanaCore
 
     enum class COMPONENT_TYPE
     {
-        COM_TY_XY = 0x2,
-        COM_TY_XYZ = 0x3,
-        COM_TY_RGB = 0x3,
-        COM_TY_RGBA = 0x4,
-        COM_TY_UV = 0x2
+        COMPONENTS_XY       = 0x2,
+        COMPONENTS_XYZ      = 0x3,
+        COMPONENTS_RGB      = 0x3,
+        COMPONENTS_RGBA     = 0x4,
+        COMPONENTS_UV       = 0x2
     };
 
     enum class DATA_TYPE
     {
-        FLOAT_TY = GL_FLOAT,
-        UINT_TY = GL_UNSIGNED_INT,
-        INT_TY = GL_INT
+        FLOAT_TY    = GL_FLOAT,
+        UINT_TY     = GL_UNSIGNED_INT,
+        INT_TY      = GL_INT
     };
 
     enum class DRAW_TYPE
     {
-        DRAW_STATIC = GL_STATIC_DRAW,
-        DRAW_DYNAMIC = GL_DYNAMIC_DRAW
+        DRAW_STATIC     = GL_STATIC_DRAW,
+        DRAW_DYNAMIC    = GL_DYNAMIC_DRAW
     };
 
     enum class DRAW_CALLS
     {
-        DRAW_POINTS = GL_POINTS,
-        DRAW_TRIANGLES = GL_TRIANGLES,
-        DRAW_LINES = GL_LINES
+        DRAW_POINTS     = GL_POINTS,
+        DRAW_TRIANGLES  = GL_TRIANGLES,
+        DRAW_LINES      = GL_LINES
     };
 
     enum class COLOR_CHANNELS
@@ -93,26 +102,33 @@ namespace TrimanaCore
     class TRIMANA_CORE Shader
     {
     public:
-        Shader() = default;
-        ~Shader() = default;
+        Shader(const std::string &vshader, const std::string &fshader);
+        Shader(const Shader&) = delete;
+        Shader& operator=(const Shader&) = delete;
+        ~Shader();
 
-        UniformVarLoc GetUniformLoc(ShaderProgramLoc &program, const std::string &uniform_val);
-        Shader *CreateShaderProgram(const std::string &vshader, const std::string &fshader);
-        void ShaderAttach(ShaderProgramLoc &program);
+        UniformVarLoc GetUniformLoc(SHADER_TYPE program, const std::string &uniform_val);
+        void ShaderAttach();
         void ShaderDettach();
-        bool DeleteShaders_N_Programs(Shader *programs);
 
-        bool UpdateUniformVariable(Shader SHADER_TYPE type, const std::string &uniform, int data);
-        bool UpdateUniformVariable(Shader SHADER_TYPE type, const std::string &uniform, unsigned int data);
-        bool UpdateUniformVariable(Shader SHADER_TYPE type, const std::string &uniform, float data);
-        bool UpdateUniformVariable(Shader SHADER_TYPE type, const std::string &uniform, float x, float y);
-        bool UpdateUniformVariable(Shader SHADER_TYPE type, const std::string &uniform, float x, float y, float z);
-        bool UpdateUniformVariable(Shader SHADER_TYPE type, const std::string &uniform, float x, float y, float z, float w);
-        bool UpdateUniformVariable(Shader SHADER_TYPE type, const std::string &uniform, glm::mat4 &data);
-        bool UpdateUniformVariable(Shader SHADER_TYPE type, const std::string &uniform, glm::mat3 &data);
+        bool UpdateUniformVariable(SHADER_TYPE type, const std::string &uniform, int data);
+        bool UpdateUniformVariable(SHADER_TYPE type, const std::string &uniform, unsigned int data);
+        bool UpdateUniformVariable(SHADER_TYPE type, const std::string &uniform, float data);
+        bool UpdateUniformVariable(SHADER_TYPE type, const std::string &uniform, float x, float y);
+        bool UpdateUniformVariable(SHADER_TYPE type, const std::string &uniform, float x, float y, float z);
+        bool UpdateUniformVariable(SHADER_TYPE type, const std::string &uniform, float x, float y, float z, float w);
+        bool UpdateUniformVariable(SHADER_TYPE type, const std::string &uniform, glm::mat4 &data);
+        bool UpdateUniformVariable(SHADER_TYPE type, const std::string &uniform, glm::mat3 &data);
 
+    private:
+        UniformVarLoc UniformUpdateValidation(SHADER_TYPE type, const std::string &uniform_var);
+        ShaderProgramLoc CompileShaderProgram(ShaderProgramLoc &program, const std::string &shader_code, TrimanaCore::SHADER_TYPE shader_type);
+        std::string ImportShader(const std::string &shader_file);
+
+    public:
         std::string VertexShaderCode{"undefine"};
         std::string FragmentShaderCode{"undefine"};
+        
         ShaderProgramLoc ShderProgramSelf{NULL};
         VertexShader VertexShaderProgram{NULL};
         FragmentShader FragmentShaderProgram{NULL};
@@ -145,21 +161,6 @@ namespace TrimanaCore
         unsigned int IndicesCount{NULL};
         unsigned int NumOfBuffers{NULL};
     };
-
-    UniformVarLoc TRIMANA_CORE GetUniformLoc(ShaderProgramLoc &program, const std::string &uniform_val);
-    Shader TRIMANA_CORE *CreateShaderProgram(const std::string &vshader, const std::string &fshader);
-    void TRIMANA_CORE ShaderAttach(ShaderProgramLoc &program);
-    void TRIMANA_CORE ShaderDettach();
-    bool TRIMANA_CORE DeleteShaders_N_Programs(Shader *programs);
-
-    bool TRIMANA_CORE UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const std::string &uniform, int data);
-    bool TRIMANA_CORE UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const std::string &uniform, unsigned int data);
-    bool TRIMANA_CORE UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const std::string &uniform, float data);
-    bool TRIMANA_CORE UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const std::string &uniform, float x, float y);
-    bool TRIMANA_CORE UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const std::string &uniform, float x, float y, float z);
-    bool TRIMANA_CORE UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const std::string &uniform, float x, float y, float z, float w);
-    bool TRIMANA_CORE UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const std::string &uniform, glm::mat4 &data);
-    bool TRIMANA_CORE UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const std::string &uniform, glm::mat3 &data);
 
     TextureLocation TRIMANA_CORE LoadTexture(const std::string &loc, COLOR_CHANNELS channels, bool flip = true);
     void TRIMANA_CORE TextureAttach(TextureLocation &texture);

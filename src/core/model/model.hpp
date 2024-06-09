@@ -28,11 +28,11 @@ namespace TrimanaCore
 
         std::vector<Vertexs> Vertices;
         std::vector<unsigned int> Indices;
-        
+
         glm::mat4 MeshSelf{1.0f};
 
         unsigned int MeshIndex{NULL};
-        unsigned int MaterialIndex{NULL}; 
+        unsigned int MaterialIndex{NULL};
         bool NoTextures{false};
     };
 
@@ -43,21 +43,23 @@ namespace TrimanaCore
 
         std::vector<std::shared_ptr<Mesh>> Meshes;
         std::vector<TextureLocation> Textures;
+
+        unsigned int ModelIndex;
         bool ReadyToDraw{false};
     };
 
-    class Renderer
+    class TRIMANA_CORE Renderer
     {
-        public:
-            Renderer() = default;
-            ~Renderer() = default;
+    public:
+        Renderer() = default;
+        ~Renderer() = default;
 
-        private:
-            std::shared_ptr<Shader> mShader;
-            std::shared_ptr<VertexBuffers> mBuffers;
-            std::vector<std::shared_ptr<Model>> mModels;
+        void ImportModel(const std::string &model_file);
+        void RenderModels();
+
+    public:
+        std::shared_ptr<Shader> ShaderPtr;
+        std::shared_ptr<VertexBuffers> VtxBuffPtr;
+        std::vector<std::shared_ptr<Model>> ModelsPtrs;
     };
-
-    std::shared_ptr<Model> TRIMANA_CORE ImportModel(const std::string& model_file);
-    void TRIMANA_CORE DeleteModel(Model* model_ptr);
 }

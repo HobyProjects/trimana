@@ -4,6 +4,27 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "gl.hpp"
 
+std::shared_ptr<TrimanaCore::GLInfo> TrimanaCore::GetGLInfo()
+{
+    std::shared_ptr<GLInfo> gl_info = std::make_shared<GLInfo>();
+    
+    gl_info->GL_LoadSuccess = true;
+    gl_info->GLVersion = reinterpret_cast<const char *>(glGetString(GL_VERSION));
+    gl_info->GLRenderer = reinterpret_cast<const char *>(glGetString(GL_RENDERER));
+    gl_info->GLVendor = reinterpret_cast<const char *>(glGetString(GL_VENDOR));
+    gl_info->GLSLVersion = reinterpret_cast<const char *>(glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+    char GL_MAJOR = gl_info->GLVersion[0];
+    char GL_MINOR = gl_info->GLVersion[2];
+    char GL_PATCH = gl_info->GLVersion[4];
+
+    std::stringstream ss;
+    ss << "#version " << GL_MAJOR << "." << GL_MINOR << "." << GL_PATCH << " core";
+    gl_info->GLSLVersion = ss.str();
+
+    return gl_info;
+}
+
 TrimanaCore::VertexBuffers::VertexBuffers(unsigned int num_buffers)
 {
     glGenBuffers(num_buffers, &VertexArryPtr);
@@ -126,7 +147,7 @@ void TrimanaCore::VertexBuffers::LinkElementBuffers()
 
 void TrimanaCore::VertexBuffers::Render(DRAW_CALLS dcall)
 {
-     glBindVertexArray(VertexArryPtr);
+    glBindVertexArray(VertexArryPtr);
 
     if (ElementBuff != NULL)
     {
@@ -140,28 +161,93 @@ void TrimanaCore::VertexBuffers::Render(DRAW_CALLS dcall)
     glBindVertexArray(GL_UNBIND);
 }
 
-
-
-
-UniformVarLoc TrimanaCore::GetUniformLoc(ShaderProgramLoc &program, const std::string &uniform_val)
+TrimanaCore::Shader::Shader(const std::string &vshader, const std::string &fshader)
 {
-    if (program)
+    ShderProgramSelf = glCreateProgram();
+    if (!ShderProgramSelf)
     {
-        UniformVarLoc uniform = glGetUniformLocation(program, uniform_val.c_str());
-        if (uniform)
-        {
-            return uniform;
-        }
-
-        TRIMANA_CORE_ERROR("INVALID UNIFORM VARIABLE : {0}", uniform_val.c_str());
-        return NULL;
+        TRIMANA_CORE_CRITICAL("SHADER PROGRAM WASN'T CREATED PROPERLY.");
+        return;
     }
 
-    TRIMANA_CORE_ERROR("INVALID SHADER PROGRAM");
+    VertexShaderCode = ImportShader(vshader);
+    FragmentShaderCode = ImportShader(fshader);
+
+    VertexShaderProgram = CompileShaderProgram(ShderProgramSelf, VertexShaderCode, SHADER_TYPE::VERTEX_SHADER);
+    FragmentShaderProgram = CompileShaderProgram(ShderProgramSelf, FragmentShaderCode, SHADER_TYPE::FRAGMENT_SHADER);
+
+    int result{0};
+    int length{0};
+    char *message{nullptr};
+
+    glLinkProgram(ShderProgramSelf);
+    glGetProgramiv(ShderProgramSelf, GL_LINK_STATUS, &result);
+
+    if (result == GL_FALSE)
+    {
+        glGetProgramiv(ShderProgramSelf, GL_INFO_LOG_LENGTH, &length);
+        message = (char *)alloca(length * sizeof(char));
+        glGetProgramInfoLog(ShderProgramSelf, sizeof(message), &length, message);
+
+        TRIMANA_CORE_CRITICAL("SHADER PROGRAM LINKING ERROR -> {0}", message);
+        return;
+    }
+
+    glValidateProgram(ShderProgramSelf);
+    glGetProgramiv(ShderProgramSelf, GL_VALIDATE_STATUS, &result);
+
+    if (result == GL_FALSE)
+    {
+        glGetProgramiv(ShderProgramSelf, GL_INFO_LOG_LENGTH, &length);
+        message = (char *)alloca(length * sizeof(char));
+        glGetProgramInfoLog(ShderProgramSelf, sizeof(message), &length, message);
+
+        TRIMANA_CORE_CRITICAL("SHADER PROGRAM VALIDATION ERROR -> {0}", message);
+        return;
+    }
+
+    ShaderProgramCreated = true;
+}
+
+TrimanaCore::Shader::~Shader()
+{
+    glDeleteShader(VertexShaderProgram);
+    glDeleteShader(FragmentShaderProgram);
+    glDeleteProgram(ShderProgramSelf);
+}
+
+UniformVarLoc TrimanaCore::Shader::GetUniformLoc(SHADER_TYPE program, const std::string &uniform_val)
+{
+    UniformVarLoc uniform{NULL};
+
+    switch (program)
+    {
+    case SHADER_TYPE::VERTEX_SHADER:
+        uniform = glGetUniformLocation(VertexShaderProgram, uniform_val.c_str());
+        break;
+
+    case SHADER_TYPE::FRAGMENT_SHADER:
+        uniform = glGetUniformLocation(FragmentShaderProgram, uniform_val.c_str());
+        break;
+
+    case SHADER_TYPE::SHADER_PROGRAM:
+        uniform = glGetUniformLocation(ShderProgramSelf, uniform_val.c_str());
+        break;
+
+    default:
+        break;
+    }
+
+    if (uniform)
+    {
+        return uniform;
+    }
+
+    TRIMANA_CORE_ERROR("INVALID SHADER PROGRAM OR INVALID UNIFORM VARIABLE");
     return NULL;
 }
 
-static std::string import_shader(const std::string &shader_file)
+std::string TrimanaCore::Shader::ImportShader(const std::string &shader_file)
 {
     std::string fileContent{" "};
     std::fstream shaderFile(shader_file.c_str(), std::ios::in);
@@ -186,7 +272,7 @@ static std::string import_shader(const std::string &shader_file)
     return fileContent;
 }
 
-static ShaderProgramLoc compile_shader_program(ShaderProgramLoc &program, const std::string &shader_code, TrimanaCore::SHADER_TYPE shader_type)
+ShaderProgramLoc TrimanaCore::Shader::CompileShaderProgram(ShaderProgramLoc &program, const std::string &shader_code, TrimanaCore::SHADER_TYPE shader_type)
 {
     unsigned int shader = glCreateShader(static_cast<GLenum>(shader_type));
     const char *src = shader_code.c_str();
@@ -213,116 +299,50 @@ static ShaderProgramLoc compile_shader_program(ShaderProgramLoc &program, const 
     return shader;
 }
 
-TrimanaCore::Shader *TrimanaCore::CreateShaderProgram(const std::string &vshader, const std::string &fshader)
+void TrimanaCore::Shader::ShaderAttach()
 {
-    Shader *shdr = new Shader();
-    shdr->ShderProgramSelf = glCreateProgram();
-    if (!shdr->ShderProgramSelf)
+    if (ShderProgramSelf)
     {
-        TRIMANA_CORE_CRITICAL("SHADER PROGRAM WASN'T CREATED PROPERLY.");
-        return nullptr;
-    }
-
-    shdr->VertexShaderCode = import_shader(vshader);
-    shdr->FragmentShaderCode = import_shader(fshader);
-
-    shdr->VertexShaderProgram = compile_shader_program(shdr->ShderProgramSelf, shdr->VertexShaderCode, SHADER_TYPE::VERTEX_SHADER);
-    shdr->FragmentShaderProgram = compile_shader_program(shdr->ShderProgramSelf, shdr->FragmentShaderCode, SHADER_TYPE::FRAGMENT_SHADER);
-
-    int result{0};
-    int length{0};
-    char *message{nullptr};
-
-    glLinkProgram(shdr->ShderProgramSelf);
-    glGetProgramiv(shdr->ShderProgramSelf, GL_LINK_STATUS, &result);
-
-    if (result == GL_FALSE)
-    {
-        glGetProgramiv(shdr->ShderProgramSelf, GL_INFO_LOG_LENGTH, &length);
-        message = (char *)alloca(length * sizeof(char));
-        glGetProgramInfoLog(shdr->ShderProgramSelf, sizeof(message), &length, message);
-
-        TRIMANA_CORE_CRITICAL("SHADER PROGRAM LINKING ERROR -> {0}", message);
-        return nullptr;
-    }
-
-    glValidateProgram(shdr->ShderProgramSelf);
-    glGetProgramiv(shdr->ShderProgramSelf, GL_VALIDATE_STATUS, &result);
-
-    if (result == GL_FALSE)
-    {
-        glGetProgramiv(shdr->ShderProgramSelf, GL_INFO_LOG_LENGTH, &length);
-        message = (char *)alloca(length * sizeof(char));
-        glGetProgramInfoLog(shdr->ShderProgramSelf, sizeof(message), &length, message);
-
-        TRIMANA_CORE_CRITICAL("SHADER PROGRAM VALIDATION ERROR -> {0}", message);
-        return nullptr;
-    }
-
-    shdr->ShaderProgramCreated = true;
-    return shdr;
-}
-
-void TrimanaCore::ShaderAttach(ShaderProgramLoc &program)
-{
-    if (program)
-    {
-        glUseProgram(program);
+        glUseProgram(ShderProgramSelf);
     }
 }
 
-void TrimanaCore::ShaderDettach()
+void TrimanaCore::Shader::ShaderDettach()
 {
     glUseProgram(GL_UNBIND);
 }
 
-bool TrimanaCore::DeleteShaders_N_Programs(Shader *programs)
+UniformVarLoc TrimanaCore::Shader::UniformUpdateValidation(SHADER_TYPE type, const std::string &uniform_var)
 {
-    if (programs != nullptr)
-    {
-        glDeleteShader(programs->VertexShaderProgram);
-        glDeleteShader(programs->FragmentShaderProgram);
-        glDeleteProgram(programs->ShderProgramSelf);
-        delete programs;
+    UniformVarLoc mem_loc{NULL};
 
-        return true;
+    switch (type)
+    {
+    case SHADER_TYPE::VERTEX_SHADER:
+        mem_loc = glGetUniformLocation(VertexShaderProgram, uniform_var.c_str());
+        break;
+
+    case SHADER_TYPE::FRAGMENT_SHADER:
+        mem_loc = glGetUniformLocation(FragmentShaderProgram, uniform_var.c_str());
+        break;
+
+    case SHADER_TYPE::SHADER_PROGRAM:
+        mem_loc = glGetUniformLocation(FragmentShaderProgram, uniform_var.c_str());
+        break;
+
+    default:
+        break;
     }
 
-    return false;
+    if (mem_loc)
+        return mem_loc;
+    else
+        return NULL;
 }
 
-static UniformVarLoc uniform_update_validation(TrimanaCore::Shader *shdr, TrimanaCore::SHADER_TYPE type, const std::string &uniform_var)
+bool TrimanaCore::Shader::UpdateUniformVariable(SHADER_TYPE type, const std::string &uniform, int data)
 {
-    if (shdr != nullptr && shdr->ShderProgramSelf)
-    {
-        UniformVarLoc mem_loc{NULL};
-
-        switch (type)
-        {
-        case TrimanaCore::SHADER_TYPE::VERTEX_SHADER:
-            mem_loc = glGetUniformLocation(shdr->VertexShaderProgram, uniform_var.c_str());
-            break;
-
-        case TrimanaCore::SHADER_TYPE::FRAGMENT_SHADER:
-            mem_loc = glGetUniformLocation(shdr->FragmentShaderProgram, uniform_var.c_str());
-            break;
-
-        default:
-            break;
-        }
-
-        if (mem_loc)
-            return mem_loc;
-        else
-            return NULL;
-    }
-
-    return NULL;
-}
-
-bool TrimanaCore::UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const std::string &uniform, int data)
-{
-    UniformVarLoc location = uniform_update_validation(shdr, type, uniform);
+    UniformVarLoc location = UniformUpdateValidation(type, uniform);
 
     if (location)
     {
@@ -333,9 +353,9 @@ bool TrimanaCore::UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const st
     return false;
 }
 
-bool TrimanaCore::UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const std::string &uniform, unsigned int data)
+bool TrimanaCore::Shader::UpdateUniformVariable(SHADER_TYPE type, const std::string &uniform, unsigned int data)
 {
-    UniformVarLoc location = uniform_update_validation(shdr, type, uniform);
+    UniformVarLoc location = UniformUpdateValidation(type, uniform);
 
     if (location)
     {
@@ -346,9 +366,9 @@ bool TrimanaCore::UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const st
     return false;
 }
 
-bool TrimanaCore::UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const std::string &uniform, float data)
+bool TrimanaCore::Shader::UpdateUniformVariable(SHADER_TYPE type, const std::string &uniform, float data)
 {
-    UniformVarLoc location = uniform_update_validation(shdr, type, uniform);
+    UniformVarLoc location = UniformUpdateValidation(type, uniform);
 
     if (location)
     {
@@ -359,9 +379,9 @@ bool TrimanaCore::UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const st
     return false;
 }
 
-bool TrimanaCore::UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const std::string &uniform, float x, float y)
+bool TrimanaCore::Shader::UpdateUniformVariable(SHADER_TYPE type, const std::string &uniform, float x, float y)
 {
-    UniformVarLoc location = uniform_update_validation(shdr, type, uniform);
+    UniformVarLoc location = UniformUpdateValidation(type, uniform);
 
     if (location)
     {
@@ -372,9 +392,9 @@ bool TrimanaCore::UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const st
     return false;
 }
 
-bool TrimanaCore::UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const std::string &uniform, float x, float y, float z)
+bool TrimanaCore::Shader::UpdateUniformVariable(SHADER_TYPE type, const std::string &uniform, float x, float y, float z)
 {
-    UniformVarLoc location = uniform_update_validation(shdr, type, uniform);
+    UniformVarLoc location = UniformUpdateValidation(type, uniform);
 
     if (location)
     {
@@ -385,9 +405,9 @@ bool TrimanaCore::UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const st
     return false;
 }
 
-bool TrimanaCore::UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const std::string &uniform, float x, float y, float z, float w)
+bool TrimanaCore::Shader::UpdateUniformVariable(SHADER_TYPE type, const std::string &uniform, float x, float y, float z, float w)
 {
-    UniformVarLoc location = uniform_update_validation(shdr, type, uniform);
+    UniformVarLoc location = UniformUpdateValidation(type, uniform);
 
     if (location)
     {
@@ -398,9 +418,9 @@ bool TrimanaCore::UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const st
     return false;
 }
 
-bool TrimanaCore::UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const std::string &uniform, glm::mat4 &data)
+bool TrimanaCore::Shader::UpdateUniformVariable(SHADER_TYPE type, const std::string &uniform, glm::mat4 &data)
 {
-    UniformVarLoc location = uniform_update_validation(shdr, type, uniform);
+    UniformVarLoc location = UniformUpdateValidation(type, uniform);
 
     if (location)
     {
@@ -411,9 +431,9 @@ bool TrimanaCore::UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const st
     return false;
 }
 
-bool TrimanaCore::UpdateUniformVariable(Shader *shdr, SHADER_TYPE type, const std::string &uniform, glm::mat3 &data)
+bool TrimanaCore::Shader::UpdateUniformVariable(SHADER_TYPE type, const std::string &uniform, glm::mat3 &data)
 {
-    UniformVarLoc location = uniform_update_validation(shdr, type, uniform);
+    UniformVarLoc location = UniformUpdateValidation(type, uniform);
 
     if (location)
     {

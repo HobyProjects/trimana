@@ -125,57 +125,58 @@ static void LoadMaterials(const aiScene* scene, std::shared_ptr<TrimanaCore::Mod
 	}
 }
 
- std::shared_ptr<TrimanaCore::Model> TrimanaCore::ImportModel(const std::string& model_file)
+void TrimanaCore::Renderer::ImportModel(const std::string& model_file)
 {
     TRIMANA_CORE_INFO("IMPORTING MODEL {0}", model_file.c_str());
+
+    static unsigned int model_index = 0;
     std::shared_ptr<Model> model = std::make_shared<Model>();
+    model->ModelIndex = model_index++;
+
     Assimp::Importer model_importer;
     const aiScene* scene = model_importer.ReadFile(model_file, (aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices));
 
     if(scene != nullptr)
     {
-        LoadNode(scene->mRootNode, scene, model.);
+        LoadNode(scene->mRootNode, scene, model);
         LoadMaterials(scene, model);
 
         if(!model->Meshes.empty())
         {
-            return model;
+            ModelsPtrs.emplace_back(model);
+            return;
         }
-        else
-        {
-            TRIMANA_CORE_ERROR("UNABLE TO IMPORT {0} MODEL, SOMETHING WENT WRONG WHILE IMPORTING..");
-            return nullptr;
-        }
-    }
-    else
-    {
+
         TRIMANA_CORE_ERROR("UNABLE TO IMPORT {0} MODEL, SOMETHING WENT WRONG WHILE IMPORTING..");
-        TRIMANA_CORE_CRITICAL(model_importer.GetErrorString());
-        return nullptr;
+        return;
     }
+
+    TRIMANA_CORE_ERROR("UNABLE TO IMPORT {0} MODEL, SOMETHING WENT WRONG WHILE IMPORTING..");
+    TRIMANA_CORE_CRITICAL(model_importer.GetErrorString());
 }
 
-void TrimanaCore::DeleteModel(Model* model_ptr)
+void TrimanaCore::Renderer::RenderModels()
 {
-    if (!model_ptr->Meshes.empty())
-	{
-		for (auto mesh : model_ptr->Meshes)
-		{
-			delete mesh;
-		}
-	}
-
-	if (!model_ptr->Textures.empty())
-	{
-		for (auto texture : model_ptr->Textures)
-		{
-			DeleteTexture(texture);
-			texture = NULL;
-		}
-	}
-
-    if(model_ptr->VBuffers != nullptr)
+    if(!ModelsPtrs.empty())
     {
-        
+        for(auto model : ModelsPtrs)
+        {
+            if(model->ReadyToDraw)
+            {
+                for(auto mesh : model->Meshes)
+                {
+                    if(mesh->NoTextures)
+                    {
+                        VtxBuffPtr->Render(DRAW_CALLS::DRAW_TRIANGLES);
+                    }
+                    else
+                    {
+                        TextureAttach(model->Textures[mesh->MaterialIndex]);
+                        VtxBuffPtr->Render(DRAW_CALLS::DRAW_TRIANGLES);
+                        TextureDettach();
+                    }
+                }
+            }
+        }
     }
 }
