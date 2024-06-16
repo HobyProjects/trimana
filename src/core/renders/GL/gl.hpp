@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 
+#define GLM_ENABLE_EXPERIMENTAL
 #include <gl/glew.h>
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -30,33 +31,33 @@ typedef unsigned int DepthBufferLoc;
 
 namespace TrimanaCore
 {
-    struct TRIMANA_CORE GLInfo
+    class GLInfo
     {
+    public:
         GLInfo() = default;
         ~GLInfo() = default;
 
-        std::string GLVersion{"Unknown"};
-        std::string GLVendor{"Unknown"};
-        std::string GLRenderer{"Unknown"};
-        std::string GLSLVersion{"#versio ?.?.?"};
-        bool GL_LoadSuccess{false};
+    public:
+        const char* GLVersion;
+        const char* GLVendor;
+        const char* GLRenderer;
+        const char* GLSLVersion;
+        bool GL_LoadSuccess;
     };
-
-    inline std::shared_ptr<GLInfo> GetGLInfo();
 
     enum class SHADER_TYPE
     {
-        SHADER_PROGRAM  = 0x0,
-        VERTEX_SHADER   = GL_VERTEX_SHADER,
+        SHADER_PROGRAM = 0x0,
+        VERTEX_SHADER = GL_VERTEX_SHADER,
         FRAGMENT_SHADER = GL_FRAGMENT_SHADER
     };
 
     enum class VERTEX_BUFFER_TYPE
     {
-        VERTEX_BUFFER   = 0x1,
-        COLOR_BUFFER    = 0x2,
-        TEXTURE_BUFFER  = 0x3,
-        NORMALS_BUFFER  = 0x4
+        VERTEX_BUFFER = 0x1,
+        COLOR_BUFFER = 0x2,
+        TEXTURE_BUFFER = 0x3,
+        NORMALS_BUFFER = 0x4
     };
 
     enum class ELEMENT_BUFFER_TYPE
@@ -66,31 +67,31 @@ namespace TrimanaCore
 
     enum class COMPONENT_TYPE
     {
-        COMPONENTS_XY       = 0x2,
-        COMPONENTS_XYZ      = 0x3,
-        COMPONENTS_RGB      = 0x3,
-        COMPONENTS_RGBA     = 0x4,
-        COMPONENTS_UV       = 0x2
+        COMPONENTS_XY = 0x2,
+        COMPONENTS_XYZ = 0x3,
+        COMPONENTS_RGB = 0x3,
+        COMPONENTS_RGBA = 0x4,
+        COMPONENTS_UV = 0x2
     };
 
     enum class DATA_TYPE
     {
-        FLOAT_TY    = GL_FLOAT,
-        UINT_TY     = GL_UNSIGNED_INT,
-        INT_TY      = GL_INT
+        FLOAT_TY = GL_FLOAT,
+        UINT_TY = GL_UNSIGNED_INT,
+        INT_TY = GL_INT
     };
 
     enum class DRAW_TYPE
     {
-        DRAW_STATIC     = GL_STATIC_DRAW,
-        DRAW_DYNAMIC    = GL_DYNAMIC_DRAW
+        DRAW_STATIC = GL_STATIC_DRAW,
+        DRAW_DYNAMIC = GL_DYNAMIC_DRAW
     };
 
     enum class DRAW_CALLS
     {
-        DRAW_POINTS     = GL_POINTS,
-        DRAW_TRIANGLES  = GL_TRIANGLES,
-        DRAW_LINES      = GL_LINES
+        DRAW_POINTS = GL_POINTS,
+        DRAW_TRIANGLES = GL_TRIANGLES,
+        DRAW_LINES = GL_LINES
     };
 
     enum class COLOR_CHANNELS
@@ -99,12 +100,12 @@ namespace TrimanaCore
         RGBA = 0x4
     };
 
-    class TRIMANA_CORE Shader
+    class Shader
     {
     public:
         Shader(const std::string &vshader, const std::string &fshader);
-        Shader(const Shader&) = delete;
-        Shader& operator=(const Shader&) = delete;
+        Shader(const Shader &) = delete;
+        Shader &operator=(const Shader &) = delete;
         ~Shader();
 
         UniformVarLoc GetUniformLoc(SHADER_TYPE program, const std::string &uniform_val);
@@ -126,21 +127,21 @@ namespace TrimanaCore
         std::string ImportShader(const std::string &shader_file);
 
     public:
-        std::string VertexShaderCode{"undefine"};
-        std::string FragmentShaderCode{"undefine"};
-        
+        std::string VertexShaderCode;
+        std::string FragmentShaderCode;
+
         ShaderProgramLoc ShderProgramSelf{NULL};
         VertexShader VertexShaderProgram{NULL};
         FragmentShader FragmentShaderProgram{NULL};
         bool ShaderProgramCreated{false};
     };
 
-    class TRIMANA_CORE VertexBuffers
+    class VertexBuffers
     {
     public:
         VertexBuffers(unsigned int num_buffers);
-        VertexBuffers(const VertexBuffers&) = delete;
-        VertexBuffers& operator=(const VertexBuffers&) = delete;
+        VertexBuffers(const VertexBuffers &) = delete;
+        VertexBuffers &operator=(const VertexBuffers &) = delete;
         ~VertexBuffers();
 
         void AssignVertexBufferData(VERTEX_BUFFER_TYPE vtype, VertexBufferData data, GLsizeiptr size, DRAW_TYPE dtype);
@@ -162,8 +163,8 @@ namespace TrimanaCore
         unsigned int NumOfBuffers{NULL};
     };
 
-    TextureLocation TRIMANA_CORE LoadTexture(const std::string &loc, COLOR_CHANNELS channels, bool flip = true);
-    void TRIMANA_CORE TextureAttach(TextureLocation &texture);
-    void TRIMANA_CORE TextureDettach();
-    void TRIMANA_CORE DeleteTexture(TextureLocation &texture);
+    TextureLocation LoadTexture(const std::string &loc, COLOR_CHANNELS channels, bool flip = true);
+    void TextureAttach(TextureLocation &texture);
+    void TextureDettach();
+    void DeleteTexture(TextureLocation &texture);
 };

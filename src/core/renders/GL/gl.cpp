@@ -1,29 +1,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
-
-#define GLM_ENABLE_EXPERIMENTAL
 #include "gl.hpp"
-
-std::shared_ptr<TrimanaCore::GLInfo> TrimanaCore::GetGLInfo()
-{
-    std::shared_ptr<GLInfo> gl_info = std::make_shared<GLInfo>();
-    
-    gl_info->GL_LoadSuccess = true;
-    gl_info->GLVersion = reinterpret_cast<const char *>(glGetString(GL_VERSION));
-    gl_info->GLRenderer = reinterpret_cast<const char *>(glGetString(GL_RENDERER));
-    gl_info->GLVendor = reinterpret_cast<const char *>(glGetString(GL_VENDOR));
-    gl_info->GLSLVersion = reinterpret_cast<const char *>(glGetString(GL_SHADING_LANGUAGE_VERSION));
-
-    char GL_MAJOR = gl_info->GLVersion[0];
-    char GL_MINOR = gl_info->GLVersion[2];
-    char GL_PATCH = gl_info->GLVersion[4];
-
-    std::stringstream ss;
-    ss << "#version " << GL_MAJOR << "." << GL_MINOR << "." << GL_PATCH << " core";
-    gl_info->GLSLVersion = ss.str();
-
-    return gl_info;
-}
 
 TrimanaCore::VertexBuffers::VertexBuffers(unsigned int num_buffers)
 {

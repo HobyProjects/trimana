@@ -4,8 +4,6 @@ bool TrimanaCore::Core::InitCore()
 {
     Log::Init();
 
-#if defined(TRIMANA_PLATFORM_WINDOWS)
-
     if (SDL_Init(SDL_INIT_FLAGS) != 0)
     {
         SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
@@ -25,11 +23,27 @@ bool TrimanaCore::Core::InitCore()
             return false;
         }
 
+        glEnable(GL_DEPTH_TEST);
         mCoreInitSuccess = true;
+
+        mGLInfo = std::make_shared<GLInfo>();
+
+        mGLInfo->GL_LoadSuccess = true;
+        mGLInfo->GLVersion = reinterpret_cast<const char *>(glGetString(GL_VERSION));
+        mGLInfo->GLRenderer = reinterpret_cast<const char *>(glGetString(GL_RENDERER));
+        mGLInfo->GLVendor = reinterpret_cast<const char *>(glGetString(GL_VENDOR));
+        mGLInfo->GLSLVersion = reinterpret_cast<const char *>(glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+        char GL_MAJOR = mGLInfo->GLVersion[0];
+        char GL_MINOR = mGLInfo->GLVersion[2];
+        char GL_PATCH = mGLInfo->GLVersion[4];
+
+        std::stringstream ss;
+        ss << "#version " << GL_MAJOR << "." << GL_MINOR << "." << GL_PATCH << " core";
+        mGLInfo->GLSLVersion = ss.str().c_str();
+
         return true;
     }
-
-#endif
 
     TRIMANA_CORE_CRITICAL("SOMETHING WENT WRONG WHILE INITIALIZING SDL >> {0}", SDL_GetError());
     mCoreInitSuccess = false;
@@ -43,12 +57,11 @@ bool TrimanaCore::Core::CoreInitSuccess()
 
 bool TrimanaCore::Core::QuitCore()
 {
-#ifdef TRIMANA_PLATFORM_WINDOWS
     if (mCoreInitSuccess)
     {
         SDL_Quit();
         return true;
     }
-#endif
+
     return false;
 }

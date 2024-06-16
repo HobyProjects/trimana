@@ -4,7 +4,7 @@
 
 namespace TrimanaCore
 {
-    class TRIMANA_CORE WindowResizeEvent : public Events
+    class WindowResizeEvent : public Events
     {
     public:
         WindowResizeEvent(int width, int height) : mWidth(width), mHeight(height) {}
@@ -21,7 +21,7 @@ namespace TrimanaCore
         int mHeight{NULL};
     };
 
-    class TRIMANA_CORE ViewportResizeEvent : public Events
+    class ViewportResizeEvent : public Events
     {
     public:
         ViewportResizeEvent(int width, int height) : mWidth(width), mHeight(height) {}
@@ -38,7 +38,7 @@ namespace TrimanaCore
         int mHeight{NULL};
     };
 
-    class TRIMANA_CORE WindowCloseEvent : public Events
+    class WindowCloseEvent : public Events
     {
     public:
         WindowCloseEvent() = default;
@@ -48,7 +48,7 @@ namespace TrimanaCore
         EVENT_LOG(EventType::EVENT_WINDOW_CLOSE, "{0}", GetEventString());
     };
 
-    class TRIMANA_CORE WindowMoveEvent : public Events
+    class WindowMoveEvent : public Events
     {
     public:
         WindowMoveEvent(int pos_x, int pos_y) : mPosX(pos_x), mPosY(pos_y) {}
@@ -65,7 +65,7 @@ namespace TrimanaCore
         int mPosY{NULL};
     };
 
-    class TRIMANA_CORE WindowMinimizeEvent : public Events
+    class WindowMinimizeEvent : public Events
     {
     public:
         WindowMinimizeEvent() = default;
@@ -75,7 +75,7 @@ namespace TrimanaCore
         EVENT_LOG(EventType::EVENT_WINDOW_MINIMIZED, "{0}", GetEventString());
     };
 
-    class TRIMANA_CORE WindowMaximizeEvent : public Events
+    class WindowMaximizeEvent : public Events
     {
     public:
         WindowMaximizeEvent() = default;
@@ -85,7 +85,7 @@ namespace TrimanaCore
         EVENT_LOG(EventType::EVENT_WINDOW_MAXIMIZED, "{0}", GetEventString());
     };
 
-    class TRIMANA_CORE WindowFocusLostEvent : public Events
+    class WindowFocusLostEvent : public Events
     {
     public:
         WindowFocusLostEvent() = default;
@@ -95,7 +95,7 @@ namespace TrimanaCore
         EVENT_LOG(EventType::EVENT_WINDOW_FOCUS_LOST, "{0}", GetEventString());
     };
 
-    class TRIMANA_CORE WindowFocusGainEvent : public Events
+    class WindowFocusGainEvent : public Events
     {
     public:
         WindowFocusGainEvent() = default;

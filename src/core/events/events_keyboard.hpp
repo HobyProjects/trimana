@@ -4,7 +4,7 @@
 
 namespace TrimanaCore
 {
-    class TRIMANA_CORE KeyboardKeyPressEvent : public Events
+    class KeyboardKeyPressEvent : public Events
     {
     public:
         KeyboardKeyPressEvent(int key_code) : mKeyCode(key_code) {}
@@ -19,7 +19,7 @@ namespace TrimanaCore
         int mKeyCode{NULL};
     };
 
-    class TRIMANA_CORE KeyboardKeyReleaseEvent : public Events
+    class KeyboardKeyReleaseEvent : public Events
     {
     public:
         KeyboardKeyReleaseEvent(int key_code) : mKeyCode(key_code) {}
@@ -34,7 +34,7 @@ namespace TrimanaCore
         int mKeyCode{NULL};
     };
 
-    class TRIMANA_CORE KeyboardKeyHold : public Events
+    class KeyboardKeyHold : public Events
     {
     public:
         KeyboardKeyHold(int key_code) : mKeyCode(key_code) {}

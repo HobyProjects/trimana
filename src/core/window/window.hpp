@@ -1,7 +1,4 @@
 #pragma once
-
-#include <memory>
-
 namespace TrimanaCore
 {
     enum class WindowState
@@ -29,44 +26,45 @@ namespace TrimanaCore
 
     typedef struct 
     {
-        unsigned int Width;
-        unsigned int Height;
+        unsigned int Width{0};
+        unsigned int Height{0};
         
     }WinChangedSize;
 
     typedef struct
     {
-        unsigned int ViewportW;
-        unsigned int ViewpportH;
+        unsigned int ViewportW{0};
+        unsigned int ViewportH{0};
 
     } WinViewport;
 
     typedef struct
     {
-        unsigned int PosX;
-        unsigned int PosY;
+        unsigned int PosX{0};
+        unsigned int PosY{0};
 
     } WinPos;
 
     typedef struct 
     {
-        bool IsVsyncEnbled;
-        bool IsFocused;
-        bool IsActive;
-        bool IsChildWin;
+        bool IsVsyncEnbled{false};
+        bool IsFocused{false};
+        bool IsActive{false};
+        bool IsChildWin{false};
 
-        unsigned int WindowFlags;
-        const char* Title;
-        float WindowRefreshRate;
+        unsigned int WindowFlags{0};
+        const char* Title{nullptr};
+        float WindowRefreshRate{0.0f};
         WindowState WindowStatus;
 
     }WinAttributes;
 
     template<typename API_Window>
-    struct WinAPI
+    struct Window
     {
-        API_Window* WindowSelf;
-        void* WindowContext;
+        API_Window* WindowSelf{nullptr};
+        void* WindowContext{nullptr};
+        API_Window* WindowPrevious{nullptr};
     };
 
     template<typename API_EventHandler>
@@ -78,13 +76,13 @@ namespace TrimanaCore
         API_EventHandler WindowEvents;
     };
 
-    template<typename API>
-    struct WinProp
+    template<typename API_Window>
+    struct WinProperties
     {
-        WinProp() = default;
-        ~WinProp() = default;
+        WinProperties() = default;
+        ~WinProperties() = default;
 
-        WinAPI<API> API;
+        Window<API_Window> Win;
         WinAttributes Attributes;
         WinPos Position;
         WinFixedSize FixedSizes;

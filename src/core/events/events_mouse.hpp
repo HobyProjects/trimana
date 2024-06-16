@@ -5,7 +5,7 @@
 
 namespace TrimanaCore
 {
-    class TRIMANA_CORE MouseButtonPressEvent : public Events
+    class MouseButtonPressEvent : public Events
     {
     public:
         MouseButtonPressEvent(int button) : mButton(button) {}
@@ -20,7 +20,7 @@ namespace TrimanaCore
         int mButton{NULL};
     };
 
-    class TRIMANA_CORE MouseButtonReleaseEvent : public Events
+    class MouseButtonReleaseEvent : public Events
     {
     public:
         MouseButtonReleaseEvent(int button) : mButton(button) {}
@@ -35,7 +35,7 @@ namespace TrimanaCore
         int mButton{NULL};
     };
 
-    class TRIMANA_CORE MouseScrollEvent : public Events
+    class MouseScrollEvent : public Events
     {
     public:
         MouseScrollEvent(float offset_x, float offset_y) : mOffsetX(offset_x), mOffsetY(offset_y) {}
@@ -52,7 +52,7 @@ namespace TrimanaCore
         float mOffsetY{NULL};
     };
 
-    class TRIMANA_CORE MousePosChangeEvent : public Events
+    class MousePosChangeEvent : public Events
     {
     public:
         MousePosChangeEvent(float pos_x, float pos_y) : mPosX(pos_x), mPosY(pos_y) {}

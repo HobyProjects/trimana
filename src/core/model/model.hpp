@@ -8,12 +8,11 @@
 #include <glm/glm.hpp>
 
 #include "renders/GL/gl.hpp"
-#include "utils/platform.hpp"
 #include "utils/logger.hpp"
 
 namespace TrimanaCore
 {
-    struct TRIMANA_CORE Vertexs
+    struct Vertexs
     {
         glm::vec3 Points;
         glm::vec2 UVs;
@@ -21,7 +20,7 @@ namespace TrimanaCore
         glm::vec4 ColorRGBA;
     };
 
-    struct TRIMANA_CORE Mesh
+    struct Mesh
     {
         Mesh() = default;
         ~Mesh() = default;
@@ -36,7 +35,7 @@ namespace TrimanaCore
         bool NoTextures{false};
     };
 
-    struct TRIMANA_CORE Model
+    struct Model
     {
         Model() = default;
         ~Model() = default;
@@ -48,7 +47,7 @@ namespace TrimanaCore
         bool ReadyToDraw{false};
     };
 
-    class TRIMANA_CORE Renderer
+    class Renderer
     {
     public:
         Renderer() = default;

@@ -1,8 +1,7 @@
-set(SDL_SHARED ON)
-set(SDL_STATIC OFF)
+set(SDL_SHARED OFF)
+set(SDL_STATIC ON)
 add_subdirectory("SDL" EXCLUDE_FROM_ALL)
 add_subdirectory("spdlog" EXCLUDE_FROM_ALL)
-
 set(GLM_BUILD_TESTS ON)
 add_subdirectory("glm" EXCLUDE_FROM_ALL)
 

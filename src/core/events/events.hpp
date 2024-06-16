@@ -56,7 +56,7 @@ namespace TrimanaCore
 #define EVENT_LOG(name, ...) // None
 #endif
 
-    class TRIMANA_CORE Events
+    class Events
     {
     public:
         Events() = default;
@@ -69,7 +69,7 @@ namespace TrimanaCore
         bool IsHandled{false};
     };
 
-    class TRIMANA_CORE EventsHandler
+    class EventsHandler
     {
     public:
         EventsHandler(Events &event) : mEvent(event) {}
