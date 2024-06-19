@@ -11,7 +11,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
-#include "utils/logger.hpp"
+#include "logger.hpp"
 
 #define GL_DEFAULT_GENERATE_BUFFERS 1
 #define GL_UNBIND 0

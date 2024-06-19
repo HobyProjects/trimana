@@ -1,103 +1,55 @@
-set(
-    IMGUI_SOURCE_DIR 
-    ${PROJECT_SOURCE_DIR}/lib/imgui
-    ${PROJECT_SOURCE_DIR}/lib/imgui/backends
-)
+cmake_minimum_required(VERSION 3.20)
 
-set(
-    IMGUI_HEADERS
-    ${PROJECT_SOURCE_DIR}/lib/imgui/imconfig.h 
-    ${PROJECT_SOURCE_DIR}/lib/imgui/imgui_internal.h
-    ${PROJECT_SOURCE_DIR}/lib/imgui/imgui.h
-    ${PROJECT_SOURCE_DIR}/lib/imgui/imstb_rectpack.h
-    ${PROJECT_SOURCE_DIR}/lib/imgui/imstb_textedit.h 
-    ${PROJECT_SOURCE_DIR}/lib/imgui/imstb_truetype.h
-    
-    ${PROJECT_SOURCE_DIR}/lib/imgui/backends/imgui_impl_sdl3.h 
-    ${PROJECT_SOURCE_DIR}/lib/imgui/backends/imgui_impl_opengl3.h 
-    ${PROJECT_SOURCE_DIR}/lib/imgui/backends/imgui_impl_opengl3_loader.h 
-)
+project(TrimanaCore VERSION 1.0.0 LANGUAGES C CXX)
+set(TRIMANA_CORE_LIBRARY "core")
 
-set(
-    IMGUI_SOURCE
-    ${PROJECT_SOURCE_DIR}/lib/imgui/imgui.cpp 
-    ${PROJECT_SOURCE_DIR}/lib/imgui/imgui_draw.cpp 
-    ${PROJECT_SOURCE_DIR}/lib/imgui/imgui_widgets.cpp 
-    ${PROJECT_SOURCE_DIR}/lib/imgui/imgui_tables.cpp 
-    ${PROJECT_SOURCE_DIR}/lib/imgui/imgui_demo.cpp
-    
-    ${PROJECT_SOURCE_DIR}/lib/imgui/backends/imgui_impl_sdl3.cpp 
-    ${PROJECT_SOURCE_DIR}/lib/imgui/backends/imgui_impl_opengl3.cpp
-)
+set(STB_IMAGE_SOURCE_DIR ${PROJECT_SOURCE_DIR}/../../lib/stb)
+set(STB_IMAGE_HEADER ${PROJECT_SOURCE_DIR}/../../lib/stb/stb_image.h)
 
-set(IMGUI_LIBRARY  "imgui")
-if(NOT BUILD_SHARED_LIBS)
-    message("-- IMGUI BUID STATIC : ON")
-    message("-- IMGUI BUID SHARED : OFF")
-    add_library(${IMGUI_LIBRARY} STATIC ${IMGUI_HEADERS} ${IMGUI_SOURCE})    
-else()
-    message("-- IMGUI BUID STATIC : OFF")
-    message("-- IMGUI BUID SHARED : ON")
-    add_library(${IMGUI_LIBRARY} SHARED ${IMGUI_HEADERS} ${IMGUI_SOURCE})
-endif()
-
-target_include_directories(${IMGUI_LIBRARY} PUBLIC ${IMGUI_SOURCE_DIR})
-target_link_libraries(
-    ${IMGUI_LIBRARY} PRIVATE 
-    SDL3::SDL3
-)
-
-add_library(ImGui::ImGui ALIAS ${IMGUI_LIBRARY})
-
-
-# ------------------------------------------------------------------------------------------------------
-
-
-set(
-    TRIMANA_CORE_SRC_DIR
-    ${PROJECT_SOURCE_DIR}/lib
-    ${PROJECT_SOURCE_DIR}/src/core
-)
+set(TRIMANA_CORE_HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/${TRIMANA_CORE_LIBRARY})
+set(TRIMANA_CORE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 set(
     TRIMANA_CORE_HEADERS
-    ${PROJECT_SOURCE_DIR}/src/core/entry/core.hpp
-    ${PROJECT_SOURCE_DIR}/src/core/utils/logger.hpp
-    ${PROJECT_SOURCE_DIR}/src/core/events/events.hpp
-    ${PROJECT_SOURCE_DIR}/src/core/events/events_window.hpp
-    ${PROJECT_SOURCE_DIR}/src/core/events/events_mouse.hpp
-    ${PROJECT_SOURCE_DIR}/src/core/events/events_keyboard.hpp
-    ${PROJECT_SOURCE_DIR}/src/core/window/sdl_window.hpp
-    ${PROJECT_SOURCE_DIR}/src/core/window/window.hpp
-    ${PROJECT_SOURCE_DIR}/src/core/renders/GL/gl.hpp
-    ${PROJECT_SOURCE_DIR}/src/core/model/model.hpp
-    ${PROJECT_SOURCE_DIR}/src/core/ecs/ecs.hpp
-    ${PROJECT_SOURCE_DIR}/src/core/gui/sdl_gui.hpp
-    ${PROJECT_SOURCE_DIR}/lib/stb/stb_image.h
+    ${TRIMANA_CORE_HEADER_DIR}/core.hpp
+    ${TRIMANA_CORE_HEADER_DIR}/logger.hpp
+    ${TRIMANA_CORE_HEADER_DIR}/events.hpp
+    ${TRIMANA_CORE_HEADER_DIR}/events_window.hpp
+    ${TRIMANA_CORE_HEADER_DIR}/events_mouse.hpp
+    ${TRIMANA_CORE_HEADER_DIR}/events_keyboard.hpp
+    ${TRIMANA_CORE_HEADER_DIR}/sdl_window.hpp
+    ${TRIMANA_CORE_HEADER_DIR}/window.hpp
+    ${TRIMANA_CORE_HEADER_DIR}/gl.hpp
+    ${TRIMANA_CORE_HEADER_DIR}/model.hpp
+    ${TRIMANA_CORE_HEADER_DIR}/ecs.hpp
+    ${TRIMANA_CORE_HEADER_DIR}/sdl_gui.hpp
 )
 
 set(
     TRIMANA_CORE_SOURCES
-    ${PROJECT_SOURCE_DIR}/src/core/entry/core.cpp
-    ${PROJECT_SOURCE_DIR}/src/core/renders/GL/gl.cpp
-    ${PROJECT_SOURCE_DIR}/src/core/model/model.cpp
-    ${PROJECT_SOURCE_DIR}/src/core/utils/logger.cpp
+    ${TRIMANA_CORE_SOURCE_DIR}/core.cpp
+    ${TRIMANA_CORE_SOURCE_DIR}/gl.cpp
+    ${TRIMANA_CORE_SOURCE_DIR}/model.cpp
+    ${TRIMANA_CORE_SOURCE_DIR}/logger.cpp
 )
 
-add_compile_definitions(TRIMANA_CORE_EXPORT)
-set(TRIMANA_CORE_LIBRARY "tricore")
-
 if(NOT BUILD_SHARED_LIBS)
-    message("-- TRIMANA CORE BUILD STATIC : ON")
-    message("-- TRIMANA CORE BUILD SHARED : OFF")
-    add_library(${TRIMANA_CORE_LIBRARY} STATIC  ${TRIMANA_CORE_HEADERS} ${TRIMANA_CORE_SOURCES})
-    target_include_directories(${TRIMANA_CORE_LIBRARY} PUBLIC  ${TRIMANA_CORE_SRC_DIR} ${IMGUI_SOURCE_DIR})
+    add_library(${TRIMANA_CORE_LIBRARY} STATIC EXCLUDE_FROM_ALL ${STB_IMAGE_HEADER} ${TRIMANA_CORE_HEADERS} ${TRIMANA_CORE_SOURCES})
+    target_include_directories(${TRIMANA_CORE_LIBRARY} PUBLIC ${TRIMANA_CORE_HEADER_DIR} ${TRIMANA_CORE_SOURCES} ${STB_IMAGE_SOURCE_DIR})
 else()
-    message("-- TRIMANA CORE BUILD STATIC : OFF")
-    message("-- TRIMANA CORE BUILD SHARED : ON")
-    add_library(${TRIMANA_CORE_LIBRARY} SHARED ${TRIMANA_CORE_HEADERS} ${TRIMANA_CORE_SOURCES})
-    target_include_directories(${TRIMANA_CORE_LIBRARY} PUBLIC  ${TRIMANA_CORE_SRC_DIR} ${IMGUI_SOURCE_DIR}) 
+    add_library(${TRIMANA_CORE_LIBRARY} SHARED EXCLUDE_FROM_ALL ${STB_IMAGE_HEADER} ${TRIMANA_CORE_HEADERS} ${TRIMANA_CORE_SOURCES})
+    target_include_directories(${TRIMANA_CORE_LIBRARY} PUBLIC ${TRIMANA_CORE_HEADER_DIR} ${TRIMANA_CORE_SOURCES} ${STB_IMAGE_SOURCE_DIR})
 endif()
+
+target_include_directories(${TRIMANA_CORE_LIBRARY} PRIVATE 
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/${TRIMANA_CORE_LIBRARY}>
+    $<INSTALL_INTERFACE:include/${TRIMANA_CORE_LIBRARY}>
+)
+
+target_include_directories(${TRIMANA_CORE_LIBRARY} PUBLIC 
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
 
 target_link_libraries(
     ${TRIMANA_CORE_LIBRARY} PUBLIC 

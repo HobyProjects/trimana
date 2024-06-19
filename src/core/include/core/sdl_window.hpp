@@ -6,22 +6,22 @@
 #include <SDL3/SDL.h>
 
 #include "window.hpp"
-#include "events/events.hpp"
-#include "events/events_keyboard.hpp"
-#include "events/events_mouse.hpp"
-#include "events/events_window.hpp"
+#include "events.hpp"
+#include "events_keyboard.hpp"
+#include "events_mouse.hpp"
+#include "events_window.hpp"
 
 namespace TrimanaCore
 {
     template <typename API_EventHandler>
-    class API_SDL_Event
+    class API_Event
     {
     public:
-        API_SDL_Event() = default;
-        ~API_SDL_Event() = default;
+        API_Event() = default;
+        ~API_Event() = default;
 
-        template <typename API_Window>
-        void PollEvents(API_Window *win_prop)
+        template <typename WindowProp>
+        void PollEvents(WindowProp *win_prop)
         {
             static_assert(std::is_same<API_EventHandler, SDL_Event>::value, "This is not a part of SDL API");
             SDL_WaitEvent(&mEvents);
@@ -40,7 +40,7 @@ namespace TrimanaCore
             {
                 win_prop->Position.PosX = mEvents.window.data1;
                 win_prop->Position.PosY = mEvents.window.data2;
-                WindowMoveEvent window_mov(window_posx, window_posy);
+                WindowMoveEvent window_mov(win_prop->Position.PosX,  win_prop->Position.PosY);
                 mCallBackFunc(window_mov);
                 break;
             }
@@ -209,15 +209,15 @@ namespace TrimanaCore
         EventCallbackFunc mCallBackFunc;
     };
 
-    template <typename API_Window>
-    class API_SDL_Window
+    template <typename _Window>
+    class API_Window
     {
     public:
-        API_SDL_Window(const std::string &title)
+        API_Window(const std::string &title)
         {
-            static_assert(std::is_same<API_Window, SDL_Window>::value, "This is not a part of SDL API");
+            static_assert(std::is_same<_Window, SDL_Window>::value, "This is not a part of SDL API");
 
-            mWin = std::make_shared<WinProperties<API_Window>>();
+            mWin = new WinProperties<_Window>();
             SDL_DisplayID display_id = SDL_GetPrimaryDisplay();
             const SDL_DisplayMode *mode = SDL_GetCurrentDisplayMode(display_id);
             if (mode != nullptr)
@@ -260,27 +260,29 @@ namespace TrimanaCore
             TRIMANA_CORE_CRITICAL("SDL WINDOW WAS NOT CREATED >>  {0}", SDL_GetError());
         }
 
-        ~API_SDL_Window()
+        ~API_Window()
         {
             if (!mWin->API.WindowContext)
-                SDL_GL_DeleteContext(window_context);
+                SDL_GL_DeleteContext(mWin->API.WindowContext);
 
             if (mWin->API.WindowSelf != nullptr)
-                SDL_DestroyWindow(window_self);
+                SDL_DestroyWindow(mWin->API.WindowSelf);
+
+            delete mWin;
         }
 
-        API_Window *GetWindow() const
+        _Window* GetWindow() const
         {
-            return mWin->API.WindowSelf;
+            return mWin->Win.WindowSelf;
         }
 
-        std::shared_ptr<WinProperties<API_Window>> GetWindowProperties()
+        WinProperties<_Window>* GetWindowProperties()
         {
             return mWin;
         }
 
     private:
-        std::shared_ptr<WinProperties<API_Window>> mWin{nullptr};
+        WinProperties<_Window>* mWin{nullptr};
     };
 
 }

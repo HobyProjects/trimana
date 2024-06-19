@@ -1,7 +1,7 @@
 #pragma once
 
 #include <functional>
-#include "utils/logger.hpp"
+#include "logger.hpp"
 
 #define ONEVENT_CALLBACK(func) std::bind(&func, this, std::placeholders::_1)
 
@@ -78,7 +78,7 @@ namespace TrimanaCore
         template <typename T, typename FUNC>
         bool Disspatch(const FUNC &func)
         {
-            if (mEvent.get_type() == T::get_static_type())
+            if (mEvent.GetType() == T::GetStaticType())
             {
                 mEvent.IsHandled |= func(static_cast<T &>(mEvent));
                 return true;

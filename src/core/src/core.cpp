@@ -4,7 +4,7 @@ bool TrimanaCore::Core::InitCore()
 {
     Log::Init();
 
-    if (SDL_Init(SDL_INIT_FLAGS) != 0)
+    if (SDL_Init((SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER)) != 0)
     {
         SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
         SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);

@@ -2,10 +2,8 @@
 
 #include <SDL3/SDL.h>
 
-#include "utils/logger.hpp"
-#include "renders/GL/gl.hpp"
-
-#define SDL_INIT_FLAGS (SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER)
+#include "logger.hpp"
+#include "gl.hpp"
 
 namespace TrimanaCore
 {

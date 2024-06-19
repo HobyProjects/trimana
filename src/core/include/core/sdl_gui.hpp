@@ -1,12 +1,12 @@
 #pragma once
 
 #include <SDL3/SDL.h>
-#include <imgui/imgui.h>
-#include <imgui/backends/imgui_impl_opengl3.h>
-#include <imgui/backends/imgui_impl_sdl3.h>
+#include <imgui.h>
+#include <imgui_impl_opengl3.h>
+#include <imgui_impl_sdl3.h>
 
-#include "renders/GL/gl.hpp"
-#include "window/window.hpp"
+#include "gl.hpp"
+#include "window.hpp"
 
 namespace TrimanaCore
 {
@@ -16,13 +16,14 @@ namespace TrimanaCore
         UI_DARK
     };
 
-    template <class API_Window, class API_EventHandler>
-    class ImGUI
+    template <class _Window, class API_EventHandler>
+    class UserInterface
     {
     public:
-        ImGUI(const std::string &glsl_ver, std::shared_ptr<WinProperties<API_Window>> win, WinEventsHandler<API_EventHandler> events, UIColor color)
+        UserInterface(const std::string &glsl_ver, WinProperties<_Window>* win, WinEventsHandler<API_EventHandler>* events, UIColor color)
         {
             mWin = win;
+            mWinEvents = events;
 
             // Setup Dear ImGui context
             IMGUI_CHECKVERSION();
@@ -50,7 +51,7 @@ namespace TrimanaCore
 
             ImGui_ImplSDL3_InitForOpenGL(mWin->Win->WindowSelf, (SDL_GLContext)mWin->Win->WindowContext);
             ImGui_ImplOpenGL3_Init(glsl_ver.c_str());
-            ImGui_ImplSDL3_ProcessEvent(&events->GetEventHandler());
+            ImGui_ImplSDL3_ProcessEvent(&mWinEvents->GetEventHandler());
 
             glGenFramebuffers(1, &mFrameBufferObject);
             glBindFramebuffer(GL_FRAMEBUFFER, mFrameBufferObject);
@@ -84,17 +85,13 @@ namespace TrimanaCore
             glBindFramebuffer(GL_FRAMEBUFFER, NULL);
         }
 
-        ~ImGUI()
+        ~UserInterface()
         {
-            if (FrameBufferObject != NULL)
+            if (mFrameBufferObject != NULL)
             {
-                glDeleteFramebuffers(GL_FRAMEBUFFER, &FrameBufferObject);
-                glDeleteTextures(1, &FrameTexture);
-                glDeleteTextures(1, &FrameTextureDepth);
-
-                FrameBufferObject = NULL;
-                FrameTexture = NULL;
-                FrameTextureDepth = NULL;
+                glDeleteFramebuffers(GL_FRAMEBUFFER, &mFrameBufferObject);
+                glDeleteTextures(1, &mFrameTexture);
+                glDeleteTextures(1, &mFrameTextureDepth);
 
                 ImGui_ImplOpenGL3_Shutdown();
                 ImGui_ImplSDL3_Shutdown();
@@ -219,7 +216,8 @@ namespace TrimanaCore
         FrameBufferLoc mFrameBufferObject{NULL};
         TextureLocation mFrameTexture{NULL};
         TextureLocation mFrameTextureDepth{NULL};
-        std::weak_ptr<WinProperties<API_Window>> mWin{nullptr};
+        WinProperties<_Window>* mWin{nullptr};
+        WinEventsHandler<API_EventHandler>* mWinEvents{nullptr};
         UIColor mUIColor;
     };
 }

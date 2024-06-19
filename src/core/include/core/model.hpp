@@ -7,8 +7,8 @@
 #include <assimp/postprocess.h>
 #include <glm/glm.hpp>
 
-#include "renders/GL/gl.hpp"
-#include "utils/logger.hpp"
+#include "gl.hpp"
+#include "logger.hpp"
 
 namespace TrimanaCore
 {

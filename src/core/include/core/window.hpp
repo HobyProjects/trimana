@@ -26,35 +26,35 @@ namespace TrimanaCore
 
     typedef struct 
     {
-        unsigned int Width{0};
-        unsigned int Height{0};
+        unsigned int Width;
+        unsigned int Height;
         
     }WinChangedSize;
 
     typedef struct
     {
-        unsigned int ViewportW{0};
-        unsigned int ViewportH{0};
+        unsigned int ViewportW;
+        unsigned int ViewportH;
 
     } WinViewport;
 
     typedef struct
     {
-        unsigned int PosX{0};
-        unsigned int PosY{0};
+        unsigned int PosX;
+        unsigned int PosY;
 
     } WinPos;
 
     typedef struct 
     {
-        bool IsVsyncEnbled{false};
-        bool IsFocused{false};
-        bool IsActive{false};
-        bool IsChildWin{false};
+        bool IsVsyncEnbled;
+        bool IsFocused;
+        bool IsActive;
+        bool IsChildWin;
 
-        unsigned int WindowFlags{0};
-        const char* Title{nullptr};
-        float WindowRefreshRate{0.0f};
+        unsigned int WindowFlags;
+        const char* Title;
+        float WindowRefreshRate;
         WindowState WindowStatus;
 
     }WinAttributes;
