@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.6)
-project(Trimana VERSION 1.0.0 LANGUAGES C CXX)
+cmake_minimum_required(VERSION 3.24)
+project(Trimana)
 
 # C standards
 set(CMAKE_C_STANDARD 17)
@@ -12,17 +12,18 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # cmake settings
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+#list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-set(CMAKE_PDB_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_PDB_OUTPUT_DIRECTORY     ${CMAKE_BINARY_DIR})
+
+set(CMAKE_BUILD_TYPE Debug)
 set(BUILD_SHARED_LIBS OFF)
-set(CMAKE_BUILD_TYPE "Debug")
-set(CMAKE_INCLUDE_DIRECTORIES_BEFORE ON)
 
 # external libraries build
-add_subdirectory("lib")
+add_subdirectory(lib)
 
 # project builds
-add_subdirectory("src/core")
-add_subdirectory("src/engine")
+add_subdirectory(src/core)
+add_subdirectory(src/engine)

@@ -10,6 +10,7 @@ TrimanaEngine::Engine::Engine()
         mWindow = new TrimanaCore::API_Window<SDL_Window>("Trimana Engine");
         mEvent = new TrimanaCore::API_Event<SDL_Event>();
         mEvent->SetEventHandlerFunc(ONEVENT_CALLBACK(Engine::OnEvents));
+        TrimanaCore::GL::GL_Load();
     }
 }
 
@@ -26,13 +27,17 @@ void TrimanaEngine::Engine::Start()
     {
         while (mWindow->GetWindowProperties()->Attributes.IsActive)
         {
-            glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+            glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
 
 
-            if(mWindow->GetWindowProperties()->Attributes.IsVsyncEnbled)
+
+
+            glClear(GL_COLOR_BUFFER_BIT);
+            
+            if (mWindow->GetWindowProperties()->Attributes.IsVsyncEnbled)
                 SDL_GL_SwapWindow(mWindow->GetWindowProperties()->Win.WindowSelf);
 
-            mEvent->PollEvents<TrimanaCore::WinProperties<SDL_Window>>(mWindow->GetWindowProperties());
+            mEvent->PollEvents(mWindow->GetWindowProperties());
         }
     }
 }
@@ -46,6 +51,10 @@ void TrimanaEngine::Engine::OnEvents(TrimanaCore::Events &e)
 {
     TrimanaCore::EventsHandler event_handler(e);
     event_handler.Disspatch<TrimanaCore::WindowCloseEvent>(ONEVENT_CALLBACK(Engine::WindowCloseEvent));
+
+#if defined(EVENT_ALLOW_TO_DISPLAY) && defined(_DEBUG)
+    e.LogEvent();
+#endif
 }
 
 bool TrimanaEngine::Engine::WindowCloseEvent(const TrimanaCore::Events &e)

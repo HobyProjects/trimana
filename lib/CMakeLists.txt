@@ -1,31 +1,28 @@
-cmake_minimum_required(VERSION 3.20)
-project(TrimanaLibs VERSION 1.0.0 LANGUAGES C CXX)
-
 # SDL Configuration
 set(SDL_SHARED OFF)
 set(SDL_STATIC ON)
-add_subdirectory("SDL" EXCLUDE_FROM_ALL)
+add_subdirectory("SDL")
 
 # spdlog Configuration
-add_subdirectory("spdlog" EXCLUDE_FROM_ALL)
+add_subdirectory("spdlog")
 
 # glm lib Configuration
-set(GLM_BUILD_TESTS ON)
-add_subdirectory("glm" EXCLUDE_FROM_ALL)
+set(GLM_BUILD_TESTS OFF)
+add_subdirectory("glm")
 
 # glew lib Configuration
 set(glew-cmake_BUILD_STATIC ON)
 set(glew-cmake_BUILD_SHARED OFF)
 set(ONLY_LIBS ON)
-add_subdirectory("glew-cmake" EXCLUDE_FROM_ALL)
+add_subdirectory("glew-cmake")
 
 # assimp lib configuration
-add_subdirectory("assimp" EXCLUDE_FROM_ALL)
+add_subdirectory("assimp")
 
 
 # imgui configuration
-set(IMGUI_DIR ${PROJECT_SOURCE_DIR}/imgui)
-set(IMGUI_BACKENDS_DIR ${PROJECT_SOURCE_DIR}/imgui/backends)
+set(IMGUI_DIR ${PROJECT_SOURCE_DIR}/lib/imgui)
+set(IMGUI_BACKENDS_DIR ${PROJECT_SOURCE_DIR}/lib/imgui/backends)
 set(IMGUI_LIBRARY imgui)
 
 set(
@@ -54,14 +51,12 @@ set(
 
 
 if(NOT BUILD_SHARED_LIBS)
-    add_library(${IMGUI_LIBRARY} STATIC EXCLUDE_FROM_ALL)
-    target_sources(${IMGUI_LIBRARY} PUBLIC  ${IMGUI_HEADERS} PRIVATE ${IMGUI_SOURCE})
-    target_include_directories(${IMGUI_LIBRARY} PUBLIC ${IMGUI_DIR} ${IMGUI_BACKENDS_DIR})    
+    add_library(${IMGUI_LIBRARY} STATIC ${IMGUI_HEADERS} ${IMGUI_SOURCE})    
 else()
-    add_library(${IMGUI_LIBRARY} SHARED EXCLUDE_FROM_ALL)
-    target_sources(${IMGUI_LIBRARY} PUBLIC  ${IMGUI_HEADERS} PRIVATE ${IMGUI_SOURCE})
-    target_include_directories(${IMGUI_LIBRARY} PUBLIC ${IMGUI_DIR} ${IMGUI_BACKENDS_DIR}) 
+    add_library(${IMGUI_LIBRARY} SHARED ${IMGUI_HEADERS} ${IMGUI_SOURCE})   
 endif()
+
+target_include_directories(${IMGUI_LIBRARY} PUBLIC ${IMGUI_DIR} ${IMGUI_BACKENDS_DIR})
 
 target_include_directories(${IMGUI_LIBRARY} INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/imgui>

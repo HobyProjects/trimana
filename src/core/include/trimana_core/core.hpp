@@ -19,6 +19,5 @@ namespace TrimanaCore
 
         private:
             bool mCoreInitSuccess;
-            std::shared_ptr<GLInfo> mGLInfo;
     };
 }

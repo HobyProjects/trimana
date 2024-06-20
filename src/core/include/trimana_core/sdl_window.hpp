@@ -13,20 +13,98 @@
 
 namespace TrimanaCore
 {
-    template <typename API_EventHandler>
+    template <typename _Window>
+    class API_Window
+    {
+    public:
+        API_Window(const std::string &title)
+        {
+            static_assert(std::is_same<_Window, SDL_Window>::value, "This is not a part of SDL API");
+
+            mWin = new WinProperties<_Window>();
+            SDL_DisplayID display_id = SDL_GetPrimaryDisplay();
+            const SDL_DisplayMode *mode = SDL_GetCurrentDisplayMode(display_id);
+            if (mode != nullptr)
+            {
+                mWin->Attributes.WindowRefreshRate = mode->refresh_rate;
+                mWin->FixedSizes.MaxW = mode->w;
+                mWin->FixedSizes.MaxH = mode->h;
+                mWin->FixedSizes.MinH = 720;
+                mWin->FixedSizes.MinW = 1024;
+            }
+            else
+            {
+                TRIMANA_CORE_WARN("DISPLAY INFO WAS NOT DETECTED BY THE APPLICATION >> {0}", SDL_GetError());
+                mWin->FixedSizes.MaxW = NULL;
+                mWin->FixedSizes.MaxH = NULL;
+                mWin->FixedSizes.MinH = NULL;
+                mWin->FixedSizes.MinW = NULL;
+            }
+
+            mWin->Attributes.Title = title.c_str();
+            mWin->Attributes.WindowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY;
+            mWin->Win.WindowSelf = SDL_CreateWindow(title.c_str(), mWin->FixedSizes.MinW, mWin->FixedSizes.MinH, mWin->Attributes.WindowFlags);
+            if (mWin->Win.WindowSelf != nullptr)
+            {
+                TRIMANA_CORE_INFO("SDL WINDOW CREATED");
+                SDL_SetWindowMinimumSize(mWin->Win.WindowSelf, mWin->FixedSizes.MinW, mWin->FixedSizes.MinH);
+                SDL_SetWindowMaximumSize(mWin->Win.WindowSelf, mWin->FixedSizes.MaxW, mWin->FixedSizes.MaxH);
+                SDL_GetWindowSizeInPixels(mWin->Win.WindowSelf, &mWin->ViewportSizes.ViewportW, &mWin->ViewportSizes.ViewportH);
+                mWin->Win.WindowContext = (SDL_GLContext)SDL_GL_CreateContext(mWin->Win.WindowSelf);
+                SDL_GL_SetSwapInterval(1);
+
+                if (!mWin->Win.WindowContext)
+                    TRIMANA_CORE_WARN("CONTEXT FOR GL WAS NOT CREATED >> {0}", SDL_GetError());
+
+                mWin->Attributes.IsActive = true;
+                mWin->Attributes.IsChildWin = false;
+                mWin->Attributes.IsFocused = true;
+                mWin->Attributes.IsVsyncEnbled = true;
+                return;
+            }
+
+            TRIMANA_CORE_CRITICAL("SDL WINDOW WAS NOT CREATED >>  {0}", SDL_GetError());
+        }
+
+        ~API_Window()
+        {
+            if (!mWin->Win.WindowContext)
+                SDL_GL_DeleteContext(mWin->Win.WindowContext);
+
+            if (mWin->Win.WindowSelf != nullptr)
+                SDL_DestroyWindow(mWin->Win.WindowSelf);
+
+            delete mWin;
+        }
+
+        _Window* GetWindow() const
+        {
+            return mWin->Win.WindowSelf;
+        }
+
+        WinProperties<_Window>* GetWindowProperties()
+        {
+            return mWin;
+        }
+
+    private:
+        WinProperties<_Window>* mWin{nullptr};
+    };
+
+     template <typename API_EventHandler>
     class API_Event
     {
     public:
         API_Event() = default;
         ~API_Event() = default;
 
-        template <typename WindowProp>
-        void PollEvents(WindowProp *win_prop)
+        template <typename _Window>
+        void PollEvents(WinProperties<_Window>* win_prop)
         {
             static_assert(std::is_same<API_EventHandler, SDL_Event>::value, "This is not a part of SDL API");
-            SDL_WaitEvent(&mEvents);
+            SDL_WaitEvent(&mEvents.WindowEvents);
 
-            switch (mEvents.type)
+            switch (mEvents.WindowEvents.type)
             {
 
             /* Window Events handle */
@@ -38,17 +116,17 @@ namespace TrimanaCore
             }
             case SDL_EVENT_WINDOW_MOVED:
             {
-                win_prop->Position.PosX = mEvents.window.data1;
-                win_prop->Position.PosY = mEvents.window.data2;
+                win_prop->Position.PosX = mEvents.WindowEvents.window.data1;
+                win_prop->Position.PosY = mEvents.WindowEvents.window.data2;
                 WindowMoveEvent window_mov(win_prop->Position.PosX,  win_prop->Position.PosY);
                 mCallBackFunc(window_mov);
                 break;
             }
             case SDL_EVENT_WINDOW_RESIZED:
             {
-                SDL_GetWindowSizeInPixels(win_prop->API.WindowSelf, &win_prop->ViewportSizes.ViewportW, &win_prop->ViewportSizes.ViewpportH);
-                win_prop->ChangedSizes.Width = mEvents.window.data1;
-                win_prop->ChangedSizes.Height = mEvents.window.data2;
+                SDL_GetWindowSizeInPixels(win_prop->Win.WindowSelf, &win_prop->ViewportSizes.ViewportW, &win_prop->ViewportSizes.ViewportH);
+                win_prop->ChangedSizes.Width = mEvents.WindowEvents.window.data1;
+                win_prop->ChangedSizes.Height = mEvents.WindowEvents.window.data2;
 
                 if ((win_prop->FixedSizes.MaxW && win_prop->FixedSizes.MaxH && win_prop->FixedSizes.MinW && win_prop->FixedSizes.MinH) != NULL)
                 {
@@ -62,15 +140,15 @@ namespace TrimanaCore
                 WindowResizeEvent window_resize(win_prop->ChangedSizes.Width, win_prop->ChangedSizes.Height);
                 mCallBackFunc(window_resize);
 
-                ViewportResizeEvent window_vp_resize(win_prop->ViewportSizes.ViewportW, win_prop->ViewportSizes.ViewpportH);
+                ViewportResizeEvent window_vp_resize(win_prop->ViewportSizes.ViewportW, win_prop->ViewportSizes.ViewportH);
                 mCallBackFunc(window_vp_resize);
                 break;
             }
             case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
             {
-                SDL_GetWindowSizeInPixels(win_prop->API.WindowSelf, &win_prop->ViewportSizes.ViewportW, &win_prop->ViewportSizes.ViewpportH);
-                win_prop->ChangedSizes.Width = mEvents.window.data1;
-                win_prop->ChangedSizes.Height = mEvents.window.data2;
+                SDL_GetWindowSizeInPixels(win_prop->Win.WindowSelf, &win_prop->ViewportSizes.ViewportW, &win_prop->ViewportSizes.ViewportH);
+                win_prop->ChangedSizes.Width = mEvents.WindowEvents.window.data1;
+                win_prop->ChangedSizes.Height = mEvents.WindowEvents.window.data2;
 
                 if ((win_prop->FixedSizes.MaxW && win_prop->FixedSizes.MaxH && win_prop->FixedSizes.MinW && win_prop->FixedSizes.MinH) != NULL)
                 {
@@ -84,7 +162,7 @@ namespace TrimanaCore
                 WindowResizeEvent window_resize(win_prop->ChangedSizes.Width, win_prop->ChangedSizes.Height);
                 mCallBackFunc(window_resize);
 
-                ViewportResizeEvent window_vp_resize(win_prop->ViewportSizes.ViewportW, win_prop->ViewportSizes.ViewpportH);
+                ViewportResizeEvent window_vp_resize(win_prop->ViewportSizes.ViewportW, win_prop->ViewportSizes.ViewportH);
                 mCallBackFunc(window_vp_resize);
                 break;
             }
@@ -130,7 +208,7 @@ namespace TrimanaCore
             /* Keyboard Events handle */
             case SDL_EVENT_KEY_DOWN:
             {
-                int code = static_cast<int>(mEvents.key.keysym.sym);
+                int code = static_cast<int>(mEvents.WindowEvents.key.keysym.sym);
                 static bool assign_once = true;
                 static int previous_code = 0;
 
@@ -156,7 +234,7 @@ namespace TrimanaCore
             }
             case SDL_EVENT_KEY_UP:
             {
-                SDL_Keycode code = mEvents.key.keysym.sym;
+                SDL_Keycode code = mEvents.WindowEvents.key.keysym.sym;
                 KeyboardKeyReleaseEvent key_release(code);
                 mCallBackFunc(key_release);
                 break;
@@ -165,25 +243,25 @@ namespace TrimanaCore
             /* Mouse event handle */
             case SDL_EVENT_MOUSE_BUTTON_DOWN:
             {
-                MouseButtonPressEvent mouse_press(mEvents.button.state);
+                MouseButtonPressEvent mouse_press(mEvents.WindowEvents.button.state);
                 mCallBackFunc(mouse_press);
                 break;
             }
             case SDL_EVENT_MOUSE_BUTTON_UP:
             {
-                MouseButtonReleaseEvent mouse_release(mEvents.button.state);
+                MouseButtonReleaseEvent mouse_release(mEvents.WindowEvents.button.state);
                 mCallBackFunc(mouse_release);
                 break;
             }
             case SDL_EVENT_MOUSE_MOTION:
             {
-                MousePosChangeEvent mouse_pos((float)mEvents.motion.x, (float)mEvents.motion.y);
+                MousePosChangeEvent mouse_pos((float)mEvents.WindowEvents.motion.x, (float)mEvents.WindowEvents.motion.y);
                 mCallBackFunc(mouse_pos);
                 break;
             }
             case SDL_EVENT_MOUSE_WHEEL:
             {
-                MouseScrollEvent mouse_scroll(mEvents.wheel.x, mEvents.wheel.y);
+                MouseScrollEvent mouse_scroll(mEvents.WindowEvents.wheel.x, mEvents.WindowEvents.wheel.y);
                 mCallBackFunc(mouse_scroll);
                 break;
             }
@@ -194,7 +272,7 @@ namespace TrimanaCore
             };
         }
 
-        static void SetEventHandlerFunc(const EventCallbackFunc &call_back)
+        void SetEventHandlerFunc(const EventCallbackFunc &call_back)
         {
             mCallBackFunc = call_back;
         }
@@ -207,82 +285,6 @@ namespace TrimanaCore
     private:
         WinEventsHandler<API_EventHandler> mEvents;
         EventCallbackFunc mCallBackFunc;
-    };
-
-    template <typename _Window>
-    class API_Window
-    {
-    public:
-        API_Window(const std::string &title)
-        {
-            static_assert(std::is_same<_Window, SDL_Window>::value, "This is not a part of SDL API");
-
-            mWin = new WinProperties<_Window>();
-            SDL_DisplayID display_id = SDL_GetPrimaryDisplay();
-            const SDL_DisplayMode *mode = SDL_GetCurrentDisplayMode(display_id);
-            if (mode != nullptr)
-            {
-                mWin->Attributes.WindowRefreshRate = mode->refresh_rate;
-                mWin->FixedSizes.MaxW = mode->w;
-                mWin->FixedSizes.MaxH = mode->h;
-                mWin->FixedSizes.MinH = 720;
-                mWin->FixedSizes.MinW = 1024;
-            }
-            else
-            {
-                TRIMANA_CORE_WARN("DISPLAY INFO WAS NOT DETECTED BY THE APPLICATION >> {0}", SDL_GetError());
-                mWin->FixedSizes.MaxW = NULL;
-                mWin->FixedSizes.MaxH = NULL;
-                mWin->FixedSizes.MinH = NULL;
-                mWin->FixedSizes.MinW = NULL;
-            }
-
-            mWin->Attributes.WindowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY;
-            mWin->API.WindowSelf = SDL_CreateWindow(this->title.c_str(), mWin->FixedSizes.MinW, mWin->FixedSizes.MinH, mWin->Attributes.WindowFlags);
-            if (mWin->API.WindowSelf != nullptr)
-            {
-                TRIMANA_CORE_INFO("SDL WINDOW CREATED");
-                SDL_SetWindowMinimumSize(mWin->API.WindowSelf, mWin->FixedSizes.MinW, mWin->FixedSizes.MinH);
-                SDL_SetWindowMaximumSize(mWin->API.WindowSelf, mWin->FixedSizes.MaxW, mWin->FixedSizes.MaxH);
-                SDL_GetWindowSizeInPixels(mWin->API.WindowSelf, &mWin->ViewportSizes.ViewportW, &mWin->ViewportSizes.ViewportH);
-                mWin->API.WindowContext = (SDL_GLContext)SDL_GL_CreateContext(mWin->API.WindowSelf);
-                SDL_GL_SetSwapInterval(1);
-
-                if (!mWin->API.WindowContext)
-                    TRIMANA_CORE_WARN("CONTEXT FOR GL WAS NOT CREATED >> {0}", SDL_GetError());
-
-                mWin->Attributes.IsActive = true;
-                mWin->Attributes.IsChildWin = false;
-                mWin->Attributes.IsFocused = true;
-                mWin->Attributes.IsVsyncEnbled = true;
-            }
-
-            TRIMANA_CORE_CRITICAL("SDL WINDOW WAS NOT CREATED >>  {0}", SDL_GetError());
-        }
-
-        ~API_Window()
-        {
-            if (!mWin->API.WindowContext)
-                SDL_GL_DeleteContext(mWin->API.WindowContext);
-
-            if (mWin->API.WindowSelf != nullptr)
-                SDL_DestroyWindow(mWin->API.WindowSelf);
-
-            delete mWin;
-        }
-
-        _Window* GetWindow() const
-        {
-            return mWin->Win.WindowSelf;
-        }
-
-        WinProperties<_Window>* GetWindowProperties()
-        {
-            return mWin;
-        }
-
-    private:
-        WinProperties<_Window>* mWin{nullptr};
     };
 
 }

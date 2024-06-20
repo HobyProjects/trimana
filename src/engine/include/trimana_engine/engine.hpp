@@ -1,8 +1,8 @@
 #pragma once
 
-#include <core/core.hpp>
-#include <core/sdl_window.hpp>
-#include <core/logger.hpp>
+#include <trimana_core/core.hpp>
+#include <trimana_core/sdl_window.hpp>
+#include <trimana_core/logger.hpp>
 
 namespace TrimanaEngine
 {

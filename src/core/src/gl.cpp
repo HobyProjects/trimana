@@ -2,6 +2,49 @@
 #include <stb_image.h>
 #include "gl.hpp"
 
+std::string TrimanaCore::GL::mGLVersion = "UNKNOWN";
+std::string TrimanaCore::GL::mGLVendor = "UNKNOWN";
+std::string TrimanaCore::GL::mGLRenderer = "UNKNOWN";
+std::string TrimanaCore::GL::mGLSLVersion = "UNKNOWN";
+bool TrimanaCore::GL::GL_LoadSuccess = false;
+
+bool TrimanaCore::GL::GL_Load()
+{
+    glewExperimental = GL_TRUE;
+    if (glewInit() != GLEW_OK)
+    {
+        TRIMANA_CORE_CRITICAL("UNABLE TO LOAD GL FUNCTIONS");
+        GL_LoadSuccess = false;
+        return GL_LoadSuccess;
+    }
+
+    glEnable(GL_DEPTH_TEST);
+    mGLVersion = std::string((const char *)glGetString(GL_VERSION));
+    mGLRenderer = std::string((const char *)glGetString(GL_RENDERER));
+    mGLVendor = std::string((const char *)glGetString(GL_VENDOR));
+    mGLSLVersion = std::string((const char *)glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+    char GL_MINOR = mGLVersion[2];
+    char GL_PATCH = mGLVersion[4];
+    char GL_MAJOR = mGLVersion[0];
+
+    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 32);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, GL_MAJOR);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, GL_MINOR);
+
+    std::stringstream ss;
+    ss << "#version " << GL_MAJOR << "." << GL_MINOR << "." << GL_PATCH << " core";
+    mGLSLVersion = ss.str();
+    GL_LoadSuccess = true;
+    return GL_LoadSuccess;
+}
+
 TrimanaCore::VertexBuffers::VertexBuffers(unsigned int num_buffers)
 {
     glGenBuffers(num_buffers, &VertexArryPtr);

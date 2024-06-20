@@ -10,6 +10,7 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/vector_angle.hpp>
+#include <SDL3/SDL.h>
 
 #include "logger.hpp"
 
@@ -31,18 +32,26 @@ typedef unsigned int DepthBufferLoc;
 
 namespace TrimanaCore
 {
-    class GLInfo
+    class GL
     {
-    public:
-        GLInfo() = default;
-        ~GLInfo() = default;
+    private:
+        GL() = default;
+        ~GL() = default;
 
     public:
-        const char* GLVersion;
-        const char* GLVendor;
-        const char* GLRenderer;
-        const char* GLSLVersion;
-        bool GL_LoadSuccess;
+        static bool GL_Load();
+        static std::string GetVersion() { return mGLVersion; }
+        static std::string GetVendor() { return mGLVendor; }
+        static std::string GetRenderer() { return mGLRenderer; }
+        static std::string GetGLSLVersion() { return mGLSLVersion; }
+        static bool IsLoadSuccess() { return GL_LoadSuccess; }
+
+    public:
+        static std::string mGLVersion;
+        static std::string mGLVendor;
+        static std::string mGLRenderer;
+        static std::string mGLSLVersion;
+        static bool GL_LoadSuccess;
     };
 
     enum class SHADER_TYPE

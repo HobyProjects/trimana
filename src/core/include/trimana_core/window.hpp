@@ -33,8 +33,8 @@ namespace TrimanaCore
 
     typedef struct
     {
-        unsigned int ViewportW;
-        unsigned int ViewportH;
+        int ViewportW;
+        int ViewportH;
 
     } WinViewport;
 
