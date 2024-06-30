@@ -43,11 +43,6 @@ target_include_directories(${TRIMANA_CORE_LIBRARY} PRIVATE
     $<INSTALL_INTERFACE:include/${TRIMANA_CORE_LIBRARY}>
 )
 
-target_include_directories(${TRIMANA_CORE_LIBRARY} PUBLIC 
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-)
-
 target_link_libraries(
     ${TRIMANA_CORE_LIBRARY} PUBLIC 
     SDL3::SDL3
