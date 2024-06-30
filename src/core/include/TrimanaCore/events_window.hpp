@@ -4,7 +4,7 @@
 
 namespace TrimanaCore
 {
-    class WindowResizeEvent : public Events
+    class WindowResizeEvent : public Event
     {
     public:
         WindowResizeEvent(int width, int height) : mWidth(width), mHeight(height) {}
@@ -21,7 +21,7 @@ namespace TrimanaCore
         int mHeight{NULL};
     };
 
-    class ViewportResizeEvent : public Events
+    class ViewportResizeEvent : public Event
     {
     public:
         ViewportResizeEvent(int width, int height) : mWidth(width), mHeight(height) {}
@@ -38,7 +38,7 @@ namespace TrimanaCore
         int mHeight{NULL};
     };
 
-    class WindowCloseEvent : public Events
+    class WindowCloseEvent : public Event
     {
     public:
         WindowCloseEvent() = default;
@@ -48,7 +48,7 @@ namespace TrimanaCore
         EVENT_LOG(EventType::EVENT_WINDOW_CLOSE, "{0}", GetEventString());
     };
 
-    class WindowMoveEvent : public Events
+    class WindowMoveEvent : public Event
     {
     public:
         WindowMoveEvent(int pos_x, int pos_y) : mPosX(pos_x), mPosY(pos_y) {}
@@ -65,7 +65,7 @@ namespace TrimanaCore
         int mPosY{NULL};
     };
 
-    class WindowMinimizeEvent : public Events
+    class WindowMinimizeEvent : public Event
     {
     public:
         WindowMinimizeEvent() = default;
@@ -75,7 +75,7 @@ namespace TrimanaCore
         EVENT_LOG(EventType::EVENT_WINDOW_MINIMIZED, "{0}", GetEventString());
     };
 
-    class WindowMaximizeEvent : public Events
+    class WindowMaximizeEvent : public Event
     {
     public:
         WindowMaximizeEvent() = default;
@@ -85,7 +85,7 @@ namespace TrimanaCore
         EVENT_LOG(EventType::EVENT_WINDOW_MAXIMIZED, "{0}", GetEventString());
     };
 
-    class WindowFocusLostEvent : public Events
+    class WindowFocusLostEvent : public Event
     {
     public:
         WindowFocusLostEvent() = default;
@@ -95,7 +95,7 @@ namespace TrimanaCore
         EVENT_LOG(EventType::EVENT_WINDOW_FOCUS_LOST, "{0}", GetEventString());
     };
 
-    class WindowFocusGainEvent : public Events
+    class WindowFocusGainEvent : public Event
     {
     public:
         WindowFocusGainEvent() = default;

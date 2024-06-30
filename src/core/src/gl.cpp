@@ -8,7 +8,7 @@ std::string TrimanaCore::GL::mGLRenderer = "UNKNOWN";
 std::string TrimanaCore::GL::mGLSLVersion = "UNKNOWN";
 bool TrimanaCore::GL::GL_LoadSuccess = false;
 
-bool TrimanaCore::GL::GL_Load()
+bool TrimanaCore::GL::Load()
 {
     glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK)
@@ -32,6 +32,9 @@ bool TrimanaCore::GL::GL_Load()
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 32);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -39,7 +42,7 @@ bool TrimanaCore::GL::GL_Load()
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, GL_MINOR);
 
     std::stringstream ss;
-    ss << "#version " << GL_MAJOR << "." << GL_MINOR << "." << GL_PATCH << " core";
+    ss << "#version " << GL_MAJOR << GL_MINOR << GL_PATCH << " core";
     mGLSLVersion = ss.str();
     GL_LoadSuccess = true;
     return GL_LoadSuccess;
@@ -67,7 +70,7 @@ TrimanaCore::VertexBuffers::~VertexBuffers()
     glDeleteBuffers(NumOfBuffers, &ElementBuff);
 }
 
-void TrimanaCore::VertexBuffers::AssignVertexBufferData(VERTEX_BUFFER_TYPE vtype, VertexBufferData data, GLsizeiptr size, DRAW_TYPE dtype)
+void TrimanaCore::VertexBuffers::BufferData(VERTEX_BUFFER_TYPE vtype, VertexBufferData data, GLsizeiptr size, DRAW_TYPE dtype)
 {
     glBindVertexArray(VertexArryPtr);
 
@@ -90,22 +93,23 @@ void TrimanaCore::VertexBuffers::AssignVertexBufferData(VERTEX_BUFFER_TYPE vtype
         break;
     }
 
-    glBufferData(GL_ARRAY_BUFFER, size * sizeof(data[0]), data, static_cast<GLenum>(dtype));
+    glBufferData(GL_ARRAY_BUFFER, size, data, static_cast<GLenum>(dtype));
     glBindVertexArray(GL_UNBIND);
 }
 
-void TrimanaCore::VertexBuffers::AssignElementBufferData(ElementBufferData data, GLsizeiptr size, DRAW_TYPE dtype)
+void TrimanaCore::VertexBuffers::BufferData(ElementBufferData data, GLsizeiptr size, DRAW_TYPE dtype)
 {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ElementBuff);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, size * sizeof(data[0]), data, static_cast<GLenum>(dtype));
 }
 
-void TrimanaCore::VertexBuffers::LinkVertexBuffers(ShaderProgramLoc &program, const std::string &attr, VERTEX_BUFFER_TYPE vtype, COMPONENT_TYPE ctype)
+void TrimanaCore::VertexBuffers::LinkBuffers(ShaderProgramLoc &program, const std::string &attr, VERTEX_BUFFER_TYPE vtype, COMPONENT_TYPE ctype)
 {
     UniformVarLoc uniform_loc = glGetAttribLocation(program, attr.c_str());
     if (uniform_loc)
     {
         glBindVertexArray(VertexArryPtr);
+        glEnableVertexAttribArray(uniform_loc);
 
         switch (vtype)
         {
@@ -127,13 +131,13 @@ void TrimanaCore::VertexBuffers::LinkVertexBuffers(ShaderProgramLoc &program, co
         }
 
         glVertexAttribPointer(uniform_loc, static_cast<GLint>(ctype), GL_FLOAT, GL_FALSE, NULL, nullptr);
-        glEnableVertexAttribArray(uniform_loc);
     }
 }
 
-void TrimanaCore::VertexBuffers::LinkUsingBufferLayout(unsigned int layout, VERTEX_BUFFER_TYPE vtype, COMPONENT_TYPE ctype)
+void TrimanaCore::VertexBuffers::LinkUsingLayout(unsigned int layout, VERTEX_BUFFER_TYPE vtype, COMPONENT_TYPE ctype)
 {
     glBindVertexArray(VertexArryPtr);
+    glEnableVertexAttribArray(layout);
 
     switch (vtype)
     {
@@ -155,21 +159,19 @@ void TrimanaCore::VertexBuffers::LinkUsingBufferLayout(unsigned int layout, VERT
     }
 
     glVertexAttribPointer(layout, static_cast<GLint>(ctype), GL_FLOAT, GL_FALSE, NULL, nullptr);
-    glEnableVertexAttribArray(layout);
 }
 
 void TrimanaCore::VertexBuffers::LinkElementBuffers()
 {
     glBindVertexArray(ElementBuff);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ElementBuff);
-    glBindVertexArray(GL_UNBIND);
 }
 
-void TrimanaCore::VertexBuffers::Render(DRAW_CALLS dcall)
+void TrimanaCore::VertexBuffers::Render(DRAW_CALLS dcall, bool draw_elements)
 {
     glBindVertexArray(VertexArryPtr);
 
-    if (ElementBuff != NULL)
+    if (draw_elements)
     {
         glDrawElements(static_cast<GLenum>(dcall), IndicesCount, GL_UNSIGNED_INT, nullptr);
     }
@@ -270,8 +272,9 @@ UniformVarLoc TrimanaCore::Shader::GetUniformLoc(SHADER_TYPE program, const std:
 std::string TrimanaCore::Shader::ImportShader(const std::string &shader_file)
 {
     std::string fileContent{" "};
-    std::fstream shaderFile(shader_file.c_str(), std::ios::in);
+    std::fstream shaderFile;
 
+    shaderFile.open(shader_file.c_str(), std::ios::in);
     if (!shaderFile.is_open())
     {
         TRIMANA_CORE_CRITICAL("Unbale to open file: {0}", shader_file.c_str());
@@ -319,7 +322,7 @@ ShaderProgramLoc TrimanaCore::Shader::CompileShaderProgram(ShaderProgramLoc &pro
     return shader;
 }
 
-void TrimanaCore::Shader::ShaderAttach()
+void TrimanaCore::Shader::Attach()
 {
     if (ShderProgramSelf)
     {
@@ -327,7 +330,7 @@ void TrimanaCore::Shader::ShaderAttach()
     }
 }
 
-void TrimanaCore::Shader::ShaderDettach()
+void TrimanaCore::Shader::Dettach()
 {
     glUseProgram(GL_UNBIND);
 }
@@ -462,6 +465,128 @@ bool TrimanaCore::Shader::UpdateUniformVariable(SHADER_TYPE type, const std::str
     }
 
     return false;
+}
+
+static float RectVertices[] =
+    {
+        // Coords
+        1.0f, -1.0f,
+        -1.0f, -1.0f,
+        -1.0f, 1.0f,
+
+        1.0f, 1.0f,
+        1.0f, -1.0f,
+        -1.0f, 1.0f};
+
+static float RectTexUV[] =
+    {
+        // texCoords
+        1.0f, 0.0f,
+        0.0f, 0.0f,
+        0.0f, 1.0f,
+        1.0f, 1.0f,
+        1.0f, 0.0f,
+        0.0f, 1.0f};
+
+TrimanaCore::FrameBuffer::FrameBuffer(glm::vec2 sizes)
+{
+    GLsizei width = (GLsizei)sizes.x;
+    GLsizei height = (GLsizei)sizes.y;
+
+    glGenFramebuffers(GL_DEFAULT_GENERATE_BUFFERS, &mFrameBufferObject);
+    glBindFramebuffer(GL_FRAMEBUFFER, mFrameBufferObject);
+
+    glGenTextures(GL_DEFAULT_GENERATE_BUFFERS, &mFrameTexture);
+    glBindTexture(GL_TEXTURE_2D, mFrameTexture);
+    glTexImage2D(GL_TEXTURE_2D, NULL, GL_RGB, width, height, NULL, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mFrameTexture, NULL);
+    glBindTexture(GL_TEXTURE_2D, GL_UNBIND);
+
+    // glGenTextures(GL_DEFAULT_GENERATE_BUFFERS, &mFrameTextureDepth);
+    // glBindTexture(GL_TEXTURE_2D, mFrameTextureDepth);
+    // glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH24_STENCIL8, width, height);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, mFrameTextureDepth, NULL);
+    // glBindTexture(GL_TEXTURE_2D, NULL);
+
+    glGenRenderbuffers(GL_DEFAULT_GENERATE_BUFFERS, &mRenderBufferObject);
+    glBindRenderbuffer(GL_RENDERBUFFER, mRenderBufferObject);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8,width, height);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mRenderBufferObject);
+    glBindRenderbuffer(GL_RENDERBUFFER, GL_UNBIND);
+
+    auto framebuff_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (framebuff_status != GL_FRAMEBUFFER_COMPLETE)
+    {
+        TRIMANA_CORE_CRITICAL("FRAME BUFFER ERROR : {0}", framebuff_status);
+        return;
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, GL_UNBIND);
+}
+
+TrimanaCore::FrameBuffer::~FrameBuffer()
+{
+    glDeleteTextures(1, &mFrameTexture);
+    //glDeleteTextures(1, &mFrameTextureDepth);
+    
+    glDeleteFramebuffers(GL_FRAMEBUFFER, &mFrameBufferObject);
+    glDeleteRenderbuffers(GL_RENDERBUFFER, &mRenderBufferObject);
+}
+
+void TrimanaCore::FrameBuffer::Bind()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, mFrameBufferObject);
+    glEnable(GL_DEPTH_TEST);
+}
+
+void TrimanaCore::FrameBuffer::UnBind()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, GL_UNBIND);
+    glDisable(GL_DEPTH_TEST);
+
+    glClearColor(1.0f, 1.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // GLenum buffers[4] = { GL_COLOR_ATTACHMENT0 };
+    // glDrawBuffers(mFrameTexture, buffers);
+}
+
+void TrimanaCore::FrameBuffer::FrameResize(glm::vec2 sizes)
+{
+    GLsizei width = (GLsizei)sizes.x;
+    GLsizei height = (GLsizei)sizes.y;
+
+    glBindTexture(GL_TEXTURE_2D, mFrameTexture);
+    glTexImage2D(GL_TEXTURE_2D, NULL, GL_RGB, width, height, NULL, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mFrameTexture, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, GL_UNBIND);
+
+    // glBindTexture(GL_TEXTURE_2D, mFrameTextureDepth);
+    // glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH24_STENCIL8, width, height);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, mFrameTextureDepth, NULL);
+    // glBindTexture(GL_TEXTURE_2D, NULL);
+
+    glBindRenderbuffer(GL_RENDERBUFFER, mRenderBufferObject);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mRenderBufferObject);
+    glBindRenderbuffer(GL_RENDERBUFFER, GL_UNBIND);
 }
 
 TextureLocation TrimanaCore::LoadTexture(const std::string &loc, COLOR_CHANNELS channels, bool flip)

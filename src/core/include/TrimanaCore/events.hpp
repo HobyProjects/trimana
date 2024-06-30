@@ -56,11 +56,11 @@ namespace TrimanaCore
 #define EVENT_LOG(name, ...) // None
 #endif
 
-    class Events
+    class Event
     {
     public:
-        Events() = default;
-        virtual ~Events() = default;
+        Event() = default;
+        virtual ~Event() = default;
         virtual EventType GetType() const = 0;
         virtual EventCategory GetCategory() const = 0;
         EVENT_ALLOW_TO_DISPLAY
@@ -72,7 +72,7 @@ namespace TrimanaCore
     class EventsHandler
     {
     public:
-        EventsHandler(Events &event) : mEvent(event) {}
+        EventsHandler(Event &event) : mEvent(event) {}
         ~EventsHandler() = default;
 
         template <typename T, typename FUNC>
@@ -88,8 +88,8 @@ namespace TrimanaCore
         }
 
     private:
-        Events &mEvent;
+        Event &mEvent;
     };
 
-    using EventCallbackFunc = std::function<void(Events &)>;
+    using EventCallbackFunc = std::function<void(Event &)>;
 }

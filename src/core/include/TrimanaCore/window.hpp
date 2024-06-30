@@ -33,8 +33,8 @@ namespace TrimanaCore
 
     typedef struct
     {
-        int ViewportW;
-        int ViewportH;
+        int Width;
+        int Height;
 
     } WinViewport;
 
@@ -60,7 +60,7 @@ namespace TrimanaCore
     }WinAttributes;
 
     template<typename API_Window>
-    struct Window
+    struct WindowContainer
     {
         API_Window* WindowSelf{nullptr};
         void* WindowContext{nullptr};
@@ -82,12 +82,12 @@ namespace TrimanaCore
         WinProperties() = default;
         ~WinProperties() = default;
 
-        Window<API_Window> Win;
+        WindowContainer<API_Window> Win;
         WinAttributes Attributes;
         WinPos Position;
         WinFixedSize FixedSizes;
         WinChangedSize ChangedSizes;
-        WinViewport ViewportSizes;
+        WinViewport Viewport;
     };
     
 }

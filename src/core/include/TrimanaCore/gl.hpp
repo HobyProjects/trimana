@@ -13,6 +13,11 @@
 #include <SDL3/SDL.h>
 
 #include "logger.hpp"
+#include "window.hpp"
+
+#ifdef _WIN32
+#pragma comment(lib, "opengl32.lib") // Search For OpenGL32.lib While Linking
+#endif
 
 #define GL_DEFAULT_GENERATE_BUFFERS 1
 #define GL_UNBIND 0
@@ -28,6 +33,7 @@ typedef float *VertexBufferData;
 typedef unsigned int TextureLocation;
 typedef unsigned int UniformVarLoc;
 typedef unsigned int FrameBufferLoc;
+typedef unsigned int RenderBufferLoc;
 typedef unsigned int DepthBufferLoc;
 
 namespace TrimanaCore
@@ -39,7 +45,7 @@ namespace TrimanaCore
         ~GL() = default;
 
     public:
-        static bool GL_Load();
+        static bool Load();
         static std::string GetVersion() { return mGLVersion; }
         static std::string GetVendor() { return mGLVendor; }
         static std::string GetRenderer() { return mGLRenderer; }
@@ -118,8 +124,8 @@ namespace TrimanaCore
         ~Shader();
 
         UniformVarLoc GetUniformLoc(SHADER_TYPE program, const std::string &uniform_val);
-        void ShaderAttach();
-        void ShaderDettach();
+        void Attach();
+        void Dettach();
 
         bool UpdateUniformVariable(SHADER_TYPE type, const std::string &uniform, int data);
         bool UpdateUniformVariable(SHADER_TYPE type, const std::string &uniform, unsigned int data);
@@ -153,12 +159,12 @@ namespace TrimanaCore
         VertexBuffers &operator=(const VertexBuffers &) = delete;
         ~VertexBuffers();
 
-        void AssignVertexBufferData(VERTEX_BUFFER_TYPE vtype, VertexBufferData data, GLsizeiptr size, DRAW_TYPE dtype);
-        void AssignElementBufferData(ElementBufferData data, GLsizeiptr size, DRAW_TYPE dtype);
-        void LinkVertexBuffers(ShaderProgramLoc &program, const std::string &attr, VERTEX_BUFFER_TYPE vtype, COMPONENT_TYPE ctype);
-        void LinkUsingBufferLayout(unsigned int layout, VERTEX_BUFFER_TYPE vtype, COMPONENT_TYPE ctype);
+        void BufferData(VERTEX_BUFFER_TYPE vtype, VertexBufferData data, GLsizeiptr size, DRAW_TYPE dtype);
+        void BufferData(ElementBufferData data, GLsizeiptr size, DRAW_TYPE dtype);
+        void LinkBuffers(ShaderProgramLoc &program, const std::string &attr, VERTEX_BUFFER_TYPE vtype, COMPONENT_TYPE ctype);
+        void LinkUsingLayout(unsigned int layout, VERTEX_BUFFER_TYPE vtype, COMPONENT_TYPE ctype);
         void LinkElementBuffers();
-        void Render(DRAW_CALLS dcall);
+        void Render(DRAW_CALLS dcall, bool draw_elements);
 
     private:
         VertexBufferLoc VertexBuff{NULL};
@@ -168,8 +174,31 @@ namespace TrimanaCore
         ElementBufferLoc ElementBuff{NULL};
         VertexAttributePtr VertexArryPtr{NULL};
 
+    public:
         unsigned int IndicesCount{NULL};
         unsigned int NumOfBuffers{NULL};
+    };
+
+    class FrameBuffer
+    {
+    public:
+        FrameBuffer(glm::vec2 size);
+        ~FrameBuffer();
+
+        void Bind();
+        void UnBind();
+        void FrameResize(glm::vec2 size);
+        glm::vec2 GetFrameSize() const { return mFrameSize; }
+        TextureLocation GetFrameTexture() const { return mFrameTexture; }
+
+
+    private:
+        glm::vec2 mFrameSize{NULL, NULL};
+        FrameBufferLoc mFrameBufferObject{NULL};
+        TextureLocation mFrameTexture{NULL};
+        
+        //TextureLocation mFrameTextureDepth{NULL};
+        RenderBufferLoc mRenderBufferObject{NULL};
     };
 
     TextureLocation LoadTexture(const std::string &loc, COLOR_CHANNELS channels, bool flip = true);

@@ -167,12 +167,12 @@ void TrimanaCore::Renderer::RenderModels()
                 {
                     if(mesh->NoTextures)
                     {
-                        VtxBuffPtr->Render(DRAW_CALLS::DRAW_TRIANGLES);
+                        VtxBuffPtr->Render(DRAW_CALLS::DRAW_TRIANGLES, true);
                     }
                     else
                     {
                         TextureAttach(model->Textures[mesh->MaterialIndex]);
-                        VtxBuffPtr->Render(DRAW_CALLS::DRAW_TRIANGLES);
+                        VtxBuffPtr->Render(DRAW_CALLS::DRAW_TRIANGLES, true);
                         TextureDettach();
                     }
                 }

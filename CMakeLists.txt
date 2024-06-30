@@ -25,5 +25,14 @@ set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(lib)
 
 # project builds
+
+file(GLOB RESOURCES_FILES 
+    ${CMAKE_CURRENT_SOURCE_DIR}/res/shaders/*.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/res/shaders/*.glsl
+)
+
+set(STB_IMAGE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/stb)
+set(STB_IMAGE_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/lib/stb/stb_image.h)
+
 add_subdirectory(src/core)
 add_subdirectory(src/engine)
